@@ -110,7 +110,7 @@ export function UsefulLinks({ links }: UsefulLinksProps) {
           
             <Button asChild variant="default" className="bg-primary hover:bg-primary/90 text-primary-foreground">
               <Link href="/useful-links">
-                View All Links & Filter
+                View All 
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
             </Button>
@@ -120,3 +120,4 @@ export function UsefulLinks({ links }: UsefulLinksProps) {
     </>
   );
 }
+
