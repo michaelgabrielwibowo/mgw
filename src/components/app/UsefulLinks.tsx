@@ -1,4 +1,3 @@
-
 "use client";
 
 import type { UsefulLink } from "@/types";
@@ -15,6 +14,7 @@ import {
   FileText,
   Landmark,
   HelpCircle, // Fallback icon
+  ArrowRight, // Added for the new button
   type LucideIcon,
 } from "lucide-react";
 import Link from "next/link";
@@ -88,8 +88,8 @@ export function UsefulLinks({ links }: UsefulLinksProps) {
           );
         })}
       </div>
-      {links.length > INITIAL_VISIBLE_LINKS && (
-        <div className="mt-8 text-center">
+      {(links.length > INITIAL_VISIBLE_LINKS) && (
+        <div className="mt-8 text-center space-y-4 sm:flex sm:flex-row sm:justify-center sm:items-center sm:space-y-0 sm:space-x-4">
           <Button
             variant="ghost"
             onClick={toggleVisibleCount}
@@ -98,6 +98,15 @@ export function UsefulLinks({ links }: UsefulLinksProps) {
             {allLinksShown ? "Show Less" : "Show More"}
             {allLinksShown ? <ChevronUp className="ml-2 h-4 w-4" /> : <ChevronDown className="ml-2 h-4 w-4" />}
           </Button>
+          
+          {allLinksShown && (
+            <Button asChild variant="default" className="bg-primary hover:bg-primary/90 text-primary-foreground">
+              <Link href="/useful-links">
+                View All Links Page
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Link>
+            </Button>
+          )}
         </div>
       )}
     </>
