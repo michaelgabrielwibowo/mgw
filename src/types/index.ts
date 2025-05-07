@@ -6,7 +6,7 @@ export interface PersonalContact {
   title: string;
   url: string;
   value: string; // e.g., email address, username
-  icon: LucideIcon;
+  iconName: string; // Changed from LucideIcon to string
 }
 
 export interface UsefulLink {
@@ -15,7 +15,7 @@ export interface UsefulLink {
   author?: string;
   url: string;
   description?: string;
-  icon?: LucideIcon; // Added optional icon for useful links
+  iconName?: string; // Changed from LucideIcon to string
 }
 
 export interface CommentFeedback {

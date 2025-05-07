@@ -6,14 +6,13 @@ import { FeedbackForm } from "@/components/app/FeedbackForm";
 import { Section } from "@/components/app/Section";
 import { Separator } from "@/components/ui/separator";
 import type { PersonalContact, UsefulLink } from "@/types";
-import { Mail, Linkedin, Github, Globe, BookOpenCheck, Users, Lightbulb, FileText, Landmark } from "lucide-react"; // Example icons, added new ones
 
 // Mock Data (replace with actual data fetching in a real app)
 const mockPersonalContacts: PersonalContact[] = [
-  { id: "1", title: "Email", value: "your.email@example.com", url: "mailto:your.email@example.com", icon: Mail },
-  { id: "2", title: "LinkedIn", value: "Your LinkedIn Profile", url: "https://linkedin.com/in/yourprofile", icon: Linkedin },
-  { id: "3", title: "GitHub", value: "Your GitHub Profile", url: "https://github.com/yourusername", icon: Github },
-  { id: "4", title: "Portfolio", value: "yourwebsite.com", url: "https://yourwebsite.com", icon: Globe },
+  { id: "1", title: "Email", value: "your.email@example.com", url: "mailto:your.email@example.com", iconName: "Mail" },
+  { id: "2", title: "LinkedIn", value: "Your LinkedIn Profile", url: "https://linkedin.com/in/yourprofile", iconName: "Linkedin" },
+  { id: "3", title: "GitHub", value: "Your GitHub Profile", url: "https://github.com/yourusername", iconName: "Github" },
+  { id: "4", title: "Portfolio", value: "yourwebsite.com", url: "https://yourwebsite.com", iconName: "Globe" },
 ];
 
 const mockUsefulLinks: UsefulLink[] = [
@@ -23,7 +22,7 @@ const mockUsefulLinks: UsefulLink[] = [
     author: "Google",
     url: "https://notebooklm.google.com/",
     description: "An AI-powered research and writing assistant to help you synthesize information and generate insights.",
-    icon: Lightbulb,
+    iconName: "Lightbulb",
   },
   {
     id: "2",
@@ -31,7 +30,7 @@ const mockUsefulLinks: UsefulLink[] = [
     author: "Rice University",
     url: "https://openstax.org/",
     description: "Access free, peer-reviewed, openly licensed textbooks for college and AP courses.",
-    icon: BookOpenCheck,
+    iconName: "BookOpenCheck",
   },
   {
     id: "3",
@@ -39,7 +38,7 @@ const mockUsefulLinks: UsefulLink[] = [
     author: "Khan Academy",
     url: "https://www.khanacademy.org/",
     description: "Offers practice exercises, instructional videos, and a personalized learning dashboard.",
-    icon: Users,
+    iconName: "Users",
   },
   {
     id: "4",
@@ -47,7 +46,7 @@ const mockUsefulLinks: UsefulLink[] = [
     author: "Various Volunteers",
     url: "https://www.gutenberg.org/",
     description: "A library of over 70,000 free eBooks, with a focus on older works for which U.S. copyright has expired.",
-    icon: FileText,
+    iconName: "FileText",
   },
   {
     id: "5",
@@ -55,27 +54,30 @@ const mockUsefulLinks: UsefulLink[] = [
     author: "MIT",
     url: "https://ocw.mit.edu/",
     description: "A web-based publication of virtually all MIT course content, open and available to the world.",
-    icon: Landmark,
+    iconName: "Landmark",
   },
   {
     id: "6",
     title: "Next.js Documentation",
     author: "Vercel",
     url: "https://nextjs.org/docs",
-    description: "The official documentation for Next.js, a React framework for PWA."
+    description: "The official documentation for Next.js, a React framework for PWA.",
+    iconName: "BookMarked" // Default icon if others are not specified
   },
   {
     id: "7",
     title: "Tailwind CSS",
     author: "Tailwind Labs",
     url: "https://tailwindcss.com/docs",
-    description: "A utility-first CSS framework for rapid UI development."
+    description: "A utility-first CSS framework for rapid UI development.",
+    iconName: "BookMarked" // Default icon
   },
   {
     id: "8",
     title: "Shadcn/ui",
     url: "https://ui.shadcn.com/",
-    description: "Beautifully designed components that you can copy and paste into your apps."
+    description: "Beautifully designed components that you can copy and paste into your apps.",
+    iconName: "BookMarked" // Default icon
   },
 ];
 
