@@ -1,7 +1,7 @@
 
 "use client";
 import Link from 'next/link';
-import { ArrowLeft, ExternalLink, BookMarked, Lightbulb, BookOpenCheck, Users, FileText, Landmark, HelpCircle, Search, Github, Code, School, Award, Video, ListVideo, BookOpen, Cpu, Globe, type LucideIcon, Sparkles, TrendingUp, Eye } from 'lucide-react';
+import { ArrowLeft, ExternalLink, BookMarked, Lightbulb, BookOpenCheck, Users, FileText, Landmark, HelpCircle, Search, Github, Code, School, Award, Video, ListVideo, BookOpen, Cpu, Globe, type LucideIcon, Sparkles, TrendingUp, Eye, Youtube } from 'lucide-react'; // Added Youtube
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Section } from '@/components/app/Section';
@@ -26,23 +26,23 @@ const iconMap: Record<string, LucideIcon> = {
   Code,
   School,
   Award,
-  Video, // Generic video icon
-  ListVideo, // YouTube playlist like icon
+  Video,        // For single YouTube videos (outline camera)
+  ListVideo,    // Available for other list-like video content if needed
   BookOpen,
   Cpu,
-  Globe, // For websites
-  Youtube: Video, // Map Youtube keyword specifically if needed, Lucide has 'Youtube' but it's a brand icon. Using generic 'Video'.
-  Link: ExternalLink, // Default for generic links
-  Sparkles, // For "Newest" or "Newly Added"
-  TrendingUp, // For "Most Popular"
-  Eye, // Could be used for "View Added" button
+  Globe,        // For websites
+  Youtube,      // For YouTube playlists (brand logo with "filled" play button)
+  Link: ExternalLink, 
+  Sparkles, 
+  TrendingUp, 
+  Eye, 
 };
 
 const filterOptions = [
   { value: 'all', label: 'All Categories' },
   { value: 'newest', label: 'Newest First' },
   { value: 'popular', label: 'Most Popular' },
-  { value: 'newly_added', label: 'Recently Suggested'}, // For toast action target
+  { value: 'newly_added', label: 'Recently Suggested'}, 
   { value: 'learning', label: 'Learning & Education' },
   { value: 'web', label: 'Websites & Tools' },
   { value: 'project_repository', label: 'Project Repositories' },
@@ -61,7 +61,7 @@ export default function UsefulLinksPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedFilter, setSelectedFilter] = useState('all');
   const [currentTime, setCurrentTime] = useState<string | null>(null);
-  const [links, setLinks] = useState<UsefulLink[]>(initialUsefulLinksData.map(link => ({...link, createdAt: new Date(link.createdAt) }))); // Ensure createdAt is Date object
+  const [links, setLinks] = useState<UsefulLink[]>(initialUsefulLinksData.map(link => ({...link, createdAt: new Date(link.createdAt) }))); 
   const [isLoadingNewLinks, setIsLoadingNewLinks] = useState(false);
   const [newlyAddedLinkIds, setNewlyAddedLinkIds] = useState<string[]>([]);
   const { toast } = useToast();
@@ -75,7 +75,6 @@ export default function UsefulLinksPage() {
   const filteredLinks = useMemo(() => {
     let processedLinks = [...links];
 
-    // Apply search term first
     if (searchTerm) {
       const term = searchTerm.toLowerCase();
       processedLinks = processedLinks.filter(link => 
@@ -85,7 +84,6 @@ export default function UsefulLinksPage() {
       );
     }
     
-    // Handle special filters or sort
     if (selectedFilter === 'newest') {
       processedLinks.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
     } else if (selectedFilter === 'popular') {
@@ -94,7 +92,6 @@ export default function UsefulLinksPage() {
       processedLinks = processedLinks.filter(link => newlyAddedLinkIds.includes(link.id))
                                      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
     } else if (selectedFilter !== 'all') {
-      // Category filtering
       processedLinks = processedLinks.filter(link => {
         const linkCategory = link.category;
         return linkCategory === selectedFilter;
@@ -113,7 +110,6 @@ export default function UsefulLinksPage() {
       const result = await suggestUsefulLinks(input);
       
       if (result && result.suggestedLinks) {
-        // The addSuggestedLinks function in site-data.ts now returns the added links
         const addedLinks: UsefulLink[] = addNewLinksToDataStore(result.suggestedLinks as SuggestedLink[]);
 
         if (addedLinks.length > 0) {
@@ -121,7 +117,7 @@ export default function UsefulLinksPage() {
             const updatedLinks = [...prevLinks];
             addedLinks.forEach(newLink => {
               if (!updatedLinks.some(ul => ul.id === newLink.id)) {
-                 updatedLinks.push({...newLink, createdAt: new Date(newLink.createdAt) }); // Ensure Date object
+                 updatedLinks.push({...newLink, createdAt: new Date(newLink.createdAt) }); 
               }
             });
             return updatedLinks;
@@ -135,7 +131,6 @@ export default function UsefulLinksPage() {
             action: (
               <Button variant="outline" size="sm" onClick={() => {
                 setSelectedFilter('newly_added');
-                // Scroll to top or to the links section might be good UX here
                 window.scrollTo({ top: 0, behavior: 'smooth' });
               }}>
                 <Eye className="mr-2 h-4 w-4" /> View Added
@@ -170,7 +165,7 @@ export default function UsefulLinksPage() {
   
   const handleFilterChange = (value: string) => {
     if (selectedFilter === 'newly_added' && value !== 'newly_added') {
-      setNewlyAddedLinkIds([]); // Clear newly added if filter changes away from it
+      setNewlyAddedLinkIds([]); 
     }
     setSelectedFilter(value);
   };
@@ -224,7 +219,6 @@ export default function UsefulLinksPage() {
                 </SelectTrigger>
                 <SelectContent>
                   {filterOptions.map(option => (
-                     // Hide "Recently Suggested" if no links were recently suggested via toast action
                     (option.value === 'newly_added' && newlyAddedLinkIds.length === 0 && selectedFilter !== 'newly_added') ? null : (
                       <SelectItem key={option.value} value={option.value}>
                         {option.label}
@@ -241,7 +235,7 @@ export default function UsefulLinksPage() {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {filteredLinks.map((link) => {
-                let IconComp = iconMap["Link"]; // Default icon
+                let IconComp = iconMap["Link"]; 
                 if (selectedFilter === 'newly_added' && newlyAddedLinkIds.includes(link.id)) {
                   IconComp = iconMap["Sparkles"];
                 } else if (selectedFilter === 'newest') {
@@ -249,7 +243,10 @@ export default function UsefulLinksPage() {
                 } else if (selectedFilter === 'popular') {
                     IconComp = iconMap["TrendingUp"];
                 } else if (link.iconName && iconMap[link.iconName]) {
-                  IconComp = iconMap[link.iconName];
+                    // For YouTube links, map based on specific keyword from data
+                    if (link.iconName === 'Youtube') IconComp = Youtube; // Filled Brand Icon for playlists
+                    else if (link.iconName === 'Video') IconComp = Video; // Outline Camera for single videos
+                    else IconComp = iconMap[link.iconName];
                 }
                 
                 return (
@@ -296,4 +293,3 @@ export default function UsefulLinksPage() {
     </div>
   );
 }
-

@@ -20,10 +20,11 @@ import {
   Code,
   School,
   Award,
-  Video, 
-  ListVideo, 
+  Video,        // For single YouTube videos (outline camera)
+  ListVideo,    // Could be used for other video list types
   BookOpen,
-  Cpu, // Added Cpu icon
+  Cpu,
+  Youtube,      // For YouTube playlists (brand logo with "filled" play button)
   type LucideIcon,
 } from "lucide-react";
 import Link from "next/link";
@@ -45,10 +46,11 @@ const iconMap: Record<string, LucideIcon> = {
   Code,
   School,
   Award,
-  Video,
-  ListVideo,
+  Video,        // For single YouTube videos (outline camera)
+  ListVideo,    // Available for other list-like video content if needed
   BookOpen,
-  Cpu, // Added Cpu icon
+  Cpu,
+  Youtube,      // For YouTube playlists (brand logo with "filled" play button)
 };
 
 const INITIAL_VISIBLE_LINKS = 4;
@@ -75,7 +77,13 @@ export function UsefulLinks({ links }: UsefulLinksProps) {
     <>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {visibleLinks.map((link) => {
-          const IconComponent = link.iconName ? (iconMap[link.iconName] || HelpCircle) : HelpCircle;
+          let IconComponent = HelpCircle; // Default icon
+          if (link.iconName && iconMap[link.iconName]) {
+            // Specific mapping for YouTube icons based on the name provided in data
+            if (link.iconName === 'Youtube') IconComponent = Youtube; // Brand logo (filled play button) for playlists
+            else if (link.iconName === 'Video') IconComponent = Video; // Camera outline (empty paint) for single videos
+            else IconComponent = iconMap[link.iconName];
+          }
           return (
             <Card key={link.id} className="flex flex-col bg-card hover:shadow-lg transition-shadow duration-300 ease-in-out">
               <CardHeader>
@@ -129,4 +137,3 @@ export function UsefulLinks({ links }: UsefulLinksProps) {
     </>
   );
 }
-

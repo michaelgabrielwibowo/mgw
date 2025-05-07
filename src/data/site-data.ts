@@ -199,7 +199,7 @@ export let usefulLinksData: UsefulLink[] = [
     author: "Harvard University",
     url: "https://www.youtube.com/watch?v=YoXxevp1WRQ",
     description: "A comprehensive introduction to computer science and programming by Harvard University, available on YouTube.",
-    iconName: "Video",
+    iconName: "Video", // Kept as Video for single video
     category: "youtube",
     createdAt: new Date("2023-09-01T10:00:00Z"),
     popularity: 98,
@@ -210,7 +210,7 @@ export let usefulLinksData: UsefulLink[] = [
     author: "CrashCourse",
     url: "https://www.youtube.com/playlist?list=PL8dPuuaLjXtNlUrzyH5r6jN9ulIgZBpdo",
     description: "A YouTube playlist that covers a wide range of computer science topics in an accessible way.",
-    iconName: "ListVideo",
+    iconName: "Youtube", // Changed from ListVideo to Youtube for playlist
     category: "youtube",
     createdAt: new Date("2023-09-10T10:00:00Z"),
     popularity: 99,
@@ -317,8 +317,10 @@ export function addSuggestedLinks(newLinks: SuggestedLink[]) {
 function mapKeywordsToIcon(keywords?: string): string | undefined {
   if (!keywords) return undefined;
   const lowerKeywords = keywords.toLowerCase();
+
   if (lowerKeywords.includes("code") || lowerKeywords.includes("repository")) return "Github";
-  if (lowerKeywords.includes("video") || lowerKeywords.includes("playlist")) return "Youtube"; // Lucide does not have Youtube icon, ensure it's available or mapped.
+  if (lowerKeywords.includes("playlist")) return "Youtube"; // Youtube icon (brand logo) for playlists
+  if (lowerKeywords.includes("video")) return "Video"; // Video icon (camera outline) for single videos
   if (lowerKeywords.includes("book")) return "BookOpen";
   if (lowerKeywords.includes("learn") || lowerKeywords.includes("education")) return "School";
   if (lowerKeywords.includes("tool") || lowerKeywords.includes("utility") || lowerKeywords.includes("web") || lowerKeywords.includes("site") ) return "Globe";

@@ -27,7 +27,7 @@ export type SuggestUsefulLinksInput = z.infer<
 
 const SuggestedLinkSchema = z.object({
   title: z.string().describe('The clear and concise title of the suggested link.'),
-  url: z.string().describe('The direct URL to the resource. Must be a valid URL.'),
+  url: z.string().describe('The direct URL to the resource. Must be a valid HTTP/HTTPS URL.'),
   author: z.string().optional().describe('The author, creator, or organization, if applicable.'),
   description: z.string().describe('A brief, informative description (1-2 sentences).'),
   category: z
@@ -43,7 +43,7 @@ const SuggestedLinkSchema = z.object({
   iconKeywords: z
     .string()
     .describe(
-      'One or two keywords that describe the link type or content (e.g., "code repository", "learning platform", "video content", "book series", "online tool").'
+      'One or two keywords that describe the link type or content. For YouTube links, use "youtube video" for single videos and "youtube playlist" for playlists. Other examples: "code repository", "learning platform", "book series", "online tool".'
     ),
 });
 export type SuggestedLink = z.infer<typeof SuggestedLinkSchema>;
@@ -80,7 +80,7 @@ For each link, you MUST provide the following information in the exact specified
 -   author: The author, creator, or organization primarily responsible for the content. If not applicable or easily identifiable, you may omit this.
 -   description: A brief, informative description (1-2 sentences) summarizing the link's content or purpose.
 -   category: Assign one of the specified categories: 'project_repository', 'website', 'book', 'youtube'.
--   iconKeywords: One or two keywords that describe the link type or content, which can be used to select an appropriate icon. Examples: "code repository", "learning platform", "video content", "book series", "utility tool", "reference material".
+-   iconKeywords: One or two keywords that describe the link type or content. For YouTube links, use "youtube video" for single videos and "youtube playlist" for playlists. Other examples: "code repository", "learning platform", "book series", "online tool", "reference material".
 
 IMPORTANT: Avoid suggesting links that are similar in title or URL to the following existing links. Do your best to find truly new and diverse resources.
 Existing Links to avoid:
