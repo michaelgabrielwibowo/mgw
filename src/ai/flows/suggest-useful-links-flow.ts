@@ -16,7 +16,7 @@ const ExistingLinkSchema = z.object({
   url: z.string().url().describe('The URL of an existing link.'),
 });
 
-export const SuggestUsefulLinksInputSchema = z.object({
+const SuggestUsefulLinksInputSchema = z.object({
   existingLinks: z
     .array(ExistingLinkSchema)
     .describe('An array of existing links to avoid suggesting duplicates.'),
@@ -49,7 +49,7 @@ const SuggestedLinkSchema = z.object({
 export type SuggestedLink = z.infer<typeof SuggestedLinkSchema>;
 
 
-export const SuggestUsefulLinksOutputSchema = z.object({
+const SuggestUsefulLinksOutputSchema = z.object({
   suggestedLinks: z
     .array(SuggestedLinkSchema)
     .describe('An array of 4 suggested useful links, one from each specified category.'),
