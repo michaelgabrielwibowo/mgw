@@ -10,9 +10,8 @@ export let siteProfileData: SiteProfile = {
 };
 
 export let personalContactsData: PersonalContact[] = [
-  { id: "1", title: "Email", value: "michaelgabrielwibowo@gmail.com", url: "mailto:michaelgabrielwibowo@gmail.com", iconName: "Mail" },
   { id: "2", title: "LinkedIn", value: "Michael Gabriel Wibowo", url: "https://www.linkedin.com/in/michael-gabriel-wibowo", iconName: "Linkedin" },
-  { id: "3", title: "Telephone", value: "+(886) 936-147-487", url: "tel:+886936147487", iconName: "Telephone" },
+  { id: "1", title: "Email", value: "michaelgabrielwibowo@gmail.com", url: "mailto:michaelgabrielwibowo@gmail.com", iconName: "Mail" },
   { id: "4", title: "WhatsApp", value: "+(886) 936-147-487", url: "https://wa.me/qr/SN33DTMONLEIM1", iconName: "Whatsapp" },
 ];
 
