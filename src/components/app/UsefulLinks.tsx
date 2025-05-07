@@ -13,12 +13,15 @@ import {
   Users,
   FileText,
   Landmark,
-  HelpCircle, // Fallback icon
+  HelpCircle, 
   ArrowRight, 
   Github, 
   Code,
   School,
   Award,
+  Video, 
+  ListVideo, 
+  BookOpen,
   type LucideIcon,
 } from "lucide-react";
 import Link from "next/link";
@@ -40,6 +43,9 @@ const iconMap: Record<string, LucideIcon> = {
   Code,
   School,
   Award,
+  Video,
+  ListVideo,
+  BookOpen,
 };
 
 const INITIAL_VISIBLE_LINKS = 4;
@@ -120,4 +126,3 @@ export function UsefulLinks({ links }: UsefulLinksProps) {
     </>
   );
 }
-

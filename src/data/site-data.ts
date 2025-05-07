@@ -49,8 +49,8 @@ export let usefulLinksData: UsefulLink[] = [
     author: "Various Volunteers",
     url: "https://www.gutenberg.org/",
     description: "A library of over 70,000 free eBooks, with a focus on older works for which U.S. copyright has expired.",
-    iconName: "FileText",
-    category: "learning",
+    iconName: "BookOpen", // Changed icon
+    category: "book", // Changed category
   },
   {
     id: "5",
@@ -150,5 +150,31 @@ export let usefulLinksData: UsefulLink[] = [
     iconName: "Award",
     category: "learning",
   },
+  {
+    id: "16",
+    title: "The Pragmatic Programmer",
+    author: "David Thomas, Andrew Hunt",
+    url: "https://pragprog.com/titles/tpp20/the-pragmatic-programmer-20th-anniversary-edition/",
+    description: "A classic book on software development and engineering, offering practical advice.",
+    iconName: "BookOpen",
+    category: "book",
+  },
+  {
+    id: "17",
+    title: "CS50's Introduction to Computer Science",
+    author: "Harvard University",
+    url: "https://www.youtube.com/watch?v=YoXxevp1WRQ",
+    description: "A comprehensive introduction to computer science and programming by Harvard University, available on YouTube.",
+    iconName: "Video",
+    category: "youtube_video",
+  },
+  {
+    id: "18",
+    title: "Crash Course Computer Science",
+    author: "CrashCourse",
+    url: "https://www.youtube.com/playlist?list=PL8dPuuaLjXtNlUrzyH5r6jN9ulIgZBpdo",
+    description: "A YouTube playlist that covers a wide range of computer science topics in an accessible way.",
+    iconName: "ListVideo",
+    category: "youtube_playlist",
+  },
 ];
-

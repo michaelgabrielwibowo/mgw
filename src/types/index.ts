@@ -24,7 +24,7 @@ export interface UsefulLink {
   url: string;
   description?: string;
   iconName?: string; // Lucide icon name as string
-  category?: 'web' | 'repository' | 'learning' | 'tool';
+  category?: 'web' | 'repository' | 'learning' | 'tool' | 'book' | 'youtube_video' | 'youtube_playlist';
 }
 
 export interface CommentFeedback {
@@ -37,3 +37,4 @@ export interface CommentFeedback {
 }
 
 export type FeedbackFormData = Omit<CommentFeedback, 'id' | 'commented_at'>;
+
