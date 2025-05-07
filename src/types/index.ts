@@ -1,12 +1,20 @@
-
 import type { LucideIcon } from 'lucide-react';
+
+export interface SiteProfile {
+  siteTitle: string; // e.g., "My Personal Page" to be used in <title>
+  metaDescriptionName: string; // e.g., "Your Name" for "A ... website by [Your Name]"
+  profileName: string;
+  tagline: string;
+  profilePictureUrl: string;
+  footerName: string;
+}
 
 export interface PersonalContact {
   id: string;
   title: string;
   url: string;
   value: string; // e.g., email address, username
-  iconName: string; // Changed from LucideIcon to string
+  iconName: string; // Lucide icon name as string
 }
 
 export interface UsefulLink {
@@ -15,8 +23,8 @@ export interface UsefulLink {
   author?: string;
   url: string;
   description?: string;
-  iconName?: string; // Changed from LucideIcon to string
-  category?: 'web' | 'repository'; // Added category field
+  iconName?: string; // Lucide icon name as string
+  category?: 'web' | 'repository' | 'learning' | 'tool';
 }
 
 export interface CommentFeedback {
@@ -29,4 +37,3 @@ export interface CommentFeedback {
 }
 
 export type FeedbackFormData = Omit<CommentFeedback, 'id' | 'commented_at'>;
-

@@ -1,126 +1,14 @@
-
 "use client";
-import type { Metadata } from 'next';
 import Link from 'next/link';
-import { ArrowLeft, ExternalLink, BookMarked, Lightbulb, BookOpenCheck, Users, FileText, Landmark, HelpCircle, Search, Github, type LucideIcon } from 'lucide-react';
+import { ArrowLeft, ExternalLink, BookMarked, Lightbulb, BookOpenCheck, Users, FileText, Landmark, HelpCircle, Search, Github, Code, School, Award, type LucideIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Section } from '@/components/app/Section';
-import type { UsefulLink } from '@/types';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useState, useMemo } from 'react';
-
-// In a real app, this data would come from a CMS, database, or a dedicated data file.
-const allMockUsefulLinks: UsefulLink[] = [
-  {
-    id: "1",
-    title: "NotebookLM",
-    author: "Google",
-    url: "https://notebooklm.google.com/",
-    description: "An AI-powered research and writing assistant to help you synthesize information and generate insights.",
-    iconName: "Lightbulb",
-    category: "web",
-  },
-  {
-    id: "2",
-    title: "OpenStax",
-    author: "Rice University",
-    url: "https://openstax.org/",
-    description: "Access free, peer-reviewed, openly licensed textbooks for college and AP courses.",
-    iconName: "BookOpenCheck",
-    category: "web",
-  },
-  {
-    id: "3",
-    title: "Khan Academy",
-    author: "Khan Academy",
-    url: "https://www.khanacademy.org/",
-    description: "Offers practice exercises, instructional videos, and a personalized learning dashboard.",
-    iconName: "Users",
-    category: "web",
-  },
-  {
-    id: "4",
-    title: "Project Gutenberg",
-    author: "Various Volunteers",
-    url: "https://www.gutenberg.org/",
-    description: "A library of over 70,000 free eBooks, with a focus on older works for which U.S. copyright has expired.",
-    iconName: "FileText",
-    category: "web",
-  },
-  {
-    id: "5",
-    title: "MIT OpenCourseWare",
-    author: "MIT",
-    url: "https://ocw.mit.edu/",
-    description: "A web-based publication of virtually all MIT course content, open and available to the world.",
-    iconName: "Landmark",
-    category: "web",
-  },
-  {
-    id: "6",
-    title: "Next.js Documentation",
-    author: "Vercel",
-    url: "https://nextjs.org/docs",
-    description: "The official documentation for Next.js, a React framework for PWA.",
-    iconName: "BookMarked",
-    category: "web",
-  },
-  {
-    id: "7",
-    title: "Tailwind CSS",
-    author: "Tailwind Labs",
-    url: "https://tailwindcss.com/docs",
-    description: "A utility-first CSS framework for rapid UI development.",
-    iconName: "BookMarked",
-    category: "web",
-  },
-  {
-    id: "8",
-    title: "Shadcn/ui",
-    url: "https://ui.shadcn.com/",
-    description: "Beautifully designed components that you can copy and paste into your apps.",
-    iconName: "BookMarked",
-    category: "web",
-  },
-  {
-    id: "9",
-    title: "Genkit GitHub Repository",
-    author: "Google",
-    url: "https://github.com/firebase/genkit",
-    description: "The official GitHub repository for Genkit, a toolkit for building AI-powered applications.",
-    iconName: "Github",
-    category: "repository",
-  },
-  {
-    id: "10",
-    title: "Mozilla Developer Network (MDN)",
-    author: "Mozilla",
-    url: "https://developer.mozilla.org/",
-    description: "Comprehensive documentation for web standards and technologies.",
-    iconName: "BookOpenCheck",
-    category: "web",
-  },
-  {
-    id: "11",
-    title: "React Official Website",
-    author: "Meta",
-    url: "https://react.dev",
-    description: "The official website for React, a JavaScript library for building user interfaces.",
-    iconName: "BookMarked",
-    category: "web",
-  },
-  {
-    id: "12",
-    title: "VS Code GitHub Repository",
-    author: "Microsoft",
-    url: "https://github.com/microsoft/vscode",
-    description: "The GitHub repository for Visual Studio Code, a popular open-source code editor.",
-    iconName: "Github",
-    category: "repository",
-  },
-];
+import { useState, useMemo, useEffect } from 'react';
+import { usefulLinksData } from '@/data/site-data'; // Import from centralized data
+import type { UsefulLink } from '@/types'; // Ensure this type is correctly defined
 
 const iconMap: Record<string, LucideIcon> = {
   Lightbulb,
@@ -131,25 +19,31 @@ const iconMap: Record<string, LucideIcon> = {
   BookMarked,
   HelpCircle,
   Github,
+  Code,
+  School,
+  Award,
 };
 
 const categoryOptions = [
   { value: 'all', label: 'All Categories' },
+  { value: 'learning', label: 'Learning & Education' },
+  { value: 'tool', label: 'Tools & Utilities' },
   { value: 'web', label: 'Web Application / Site' },
   { value: 'repository', label: 'Project Repository' },
 ];
 
-// export const metadata: Metadata = { // Cannot export metadata from client component
-//   title: 'All Useful Links | PersonaLink',
-//   description: 'A curated collection of all useful links and resources from PersonaLink.',
-// };
-
 export default function UsefulLinksPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const [currentTime, setCurrentTime] = useState<string | null>(null);
+
+  useEffect(() => {
+    setCurrentTime(new Date().getFullYear().toString());
+  }, []);
+
 
   const filteredLinks = useMemo(() => {
-    return allMockUsefulLinks
+    return usefulLinksData // Use imported data
       .filter(link => {
         if (selectedCategory === 'all') return true;
         return link.category === selectedCategory;
@@ -163,6 +57,14 @@ export default function UsefulLinksPage() {
         );
       });
   }, [searchTerm, selectedCategory]);
+
+  if (currentTime === null) {
+    return (
+      <div className="flex flex-col min-h-screen items-center justify-center">
+        <p>Loading page...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -209,7 +111,7 @@ export default function UsefulLinksPage() {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {filteredLinks.map((link) => {
-                const IconComponent = link.iconName ? (iconMap[link.iconName] || iconMap["BookMarked"]) : iconMap["BookMarked"];
+                const IconComponent = link.iconName ? (iconMap[link.iconName] || iconMap["HelpCircle"]) : iconMap["HelpCircle"];
                 return (
                   <Card key={link.id} className="flex flex-col bg-card hover:shadow-xl transition-shadow duration-300 ease-in-out">
                     <CardHeader>
@@ -226,14 +128,14 @@ export default function UsefulLinksPage() {
                         </div>
                       </div>
                     </CardHeader>
-                    <CardContent className="flex-grow pl-[calc(1.5rem+1.5rem+0.75rem)] pr-6 pb-6 pt-0">
+                    <CardContent className="flex-grow pl-[calc(1.5rem+0.75rem+theme(spacing.3))] pr-6 pb-6 pt-0">
                       {link.description ? (
                         <p className="text-sm text-card-foreground">{link.description}</p>
                       ) : (
                         <p className="text-sm text-muted-foreground italic">No description provided.</p>
                       )}
                     </CardContent>
-                    <CardFooter className="pl-[calc(1.5rem+1.5rem+0.75rem)] pr-6 pb-6">
+                    <CardFooter className="pl-[calc(1.5rem+0.75rem+theme(spacing.3))] pr-6 pb-6">
                       <Button asChild variant="outline" className="w-full border-accent text-accent hover:bg-accent hover:text-accent-foreground">
                         <Link href={link.url} target="_blank" rel="noopener noreferrer">
                           Visit Link <ExternalLink className="ml-2 h-4 w-4" />
@@ -248,7 +150,7 @@ export default function UsefulLinksPage() {
         </Section>
       </main>
       <footer className="py-6 text-center text-sm text-muted-foreground border-t border-border/50">
-        <p>&copy; {new Date().getFullYear()} Your Name. All rights reserved. {/* TODO: User to update */}</p>
+        <p>&copy; {currentTime} {siteProfileData.footerName}. All rights reserved.</p>
         <p className="mt-1">Explore more useful links and continue learning.</p>
       </footer>
     </div>

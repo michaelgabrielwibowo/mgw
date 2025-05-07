@@ -1,4 +1,3 @@
-
 "use client";
 import type { PersonalContact } from "@/types";
 import { Card, CardContent } from "@/components/ui/card";
@@ -25,7 +24,7 @@ export function PersonalContacts({ contacts }: PersonalContactsProps) {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
       {contacts.map((contact) => {
-        const IconComponent = iconMap[contact.iconName] || iconMap["HelpCircle"];
+        const IconComponent = contact.iconName ? (iconMap[contact.iconName] || HelpCircle) : HelpCircle;
         return (
           <Card key={contact.id} className="hover:shadow-lg transition-shadow duration-300 ease-in-out bg-card">
             <Link href={contact.url} target="_blank" rel="noopener noreferrer" passHref>

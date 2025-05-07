@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
+import { siteProfileData } from '@/data/site-data';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -14,8 +15,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'PersonaLink | My Personal Page',
-  description: 'A beautifully simple self introductory website by [Your Name].', // User should update [Your Name]
+  title: `PersonaLink | ${siteProfileData.siteTitle}`,
+  description: `A beautifully simple self introductory website by ${siteProfileData.metaDescriptionName}.`,
 };
 
 export default function RootLayout({

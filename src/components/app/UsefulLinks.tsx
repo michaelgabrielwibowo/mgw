@@ -1,4 +1,3 @@
-
 "use client";
 
 import type { UsefulLink } from "@/types";
@@ -15,8 +14,11 @@ import {
   FileText,
   Landmark,
   HelpCircle, // Fallback icon
-  ArrowRight, // Added for the new button
-  Github, // Added Github icon
+  ArrowRight, 
+  Github, 
+  Code,
+  School,
+  Award,
   type LucideIcon,
 } from "lucide-react";
 import Link from "next/link";
@@ -35,6 +37,9 @@ const iconMap: Record<string, LucideIcon> = {
   BookMarked, 
   HelpCircle, 
   Github,
+  Code,
+  School,
+  Award,
 };
 
 const INITIAL_VISIBLE_LINKS = 4;
@@ -61,7 +66,7 @@ export function UsefulLinks({ links }: UsefulLinksProps) {
     <>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {visibleLinks.map((link) => {
-          const IconComponent = link.iconName ? (iconMap[link.iconName] || iconMap["BookMarked"]) : iconMap["BookMarked"];
+          const IconComponent = link.iconName ? (iconMap[link.iconName] || HelpCircle) : HelpCircle;
           return (
             <Card key={link.id} className="flex flex-col bg-card hover:shadow-lg transition-shadow duration-300 ease-in-out">
               <CardHeader>
@@ -73,14 +78,14 @@ export function UsefulLinks({ links }: UsefulLinksProps) {
                   </div>
                 </div>
               </CardHeader>
-              <CardContent className="flex-grow pl-[calc(1.5rem+1.5rem+0.75rem)] pr-6 pb-6 pt-0"> {/* Adjust padding to align with title */}
+              <CardContent className="flex-grow pl-[calc(1.5rem+0.75rem+theme(spacing.3))] pr-6 pb-6 pt-0">
                 {link.description ? (
                   <p className="text-sm text-card-foreground">{link.description}</p>
                 ) : (
                   <p className="text-sm text-muted-foreground italic">No description provided.</p>
                 )}
               </CardContent>
-              <CardFooter className="pl-[calc(1.5rem+1.5rem+0.75rem)] pr-6 pb-6">
+              <CardFooter className="pl-[calc(1.5rem+0.75rem+theme(spacing.3))] pr-6 pb-6">
                 <Button asChild variant="outline" className="w-full border-accent text-accent hover:bg-accent hover:text-accent-foreground">
                   <Link href={link.url} target="_blank" rel="noopener noreferrer">
                     Visit Link <ExternalLink className="ml-2 h-4 w-4" />
@@ -115,4 +120,3 @@ export function UsefulLinks({ links }: UsefulLinksProps) {
     </>
   );
 }
-
