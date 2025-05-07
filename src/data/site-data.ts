@@ -4,7 +4,7 @@ export let siteProfileData: SiteProfile = {
   siteTitle: 'Michael Gabriel Wibowo | Personal Page',
   metaDescriptionName: 'Michael Gabriel Wibowo',
   profileName: 'Michael Gabriel Wibowo',
-  tagline: 'International Student from Indonesia @ Tunghai University, Taiwan | Aspiring Full-Stack Developer & Tech Enthusiast',
+  tagline: 'International Student from Indonesia at Tunghai University, Taiwan',
   profilePictureUrl: 'https://picsum.photos/160/160', // Placeholder, user can update in admin
   footerName: 'Michael Gabriel Wibowo',
 };

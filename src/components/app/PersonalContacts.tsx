@@ -2,7 +2,7 @@
 import type { PersonalContact } from "@/types";
 import { Card, CardContent } from "@/components/ui/card";
 import Link from "next/link";
-import { Mail, Linkedin, Github, Globe, type LucideIcon, HelpCircle } from "lucide-react";
+import { Mail, Linkedin, Globe, HelpCircle, type LucideIcon } from 'lucide-react';
 import { FaWhatsapp } from 'react-icons/fa'; // Import WhatsApp icon
 
 interface PersonalContactsProps {
@@ -12,7 +12,6 @@ interface PersonalContactsProps {
 const iconMap: Record<string, LucideIcon | React.ComponentType> = {
   Mail,
   Linkedin,
-  Github,
   Globe,
   HelpCircle, // Default icon
   Whatsapp: FaWhatsapp,
@@ -46,4 +45,5 @@ export function PersonalContacts({ contacts }: PersonalContactsProps) {
     </div>
   );
 }
+
 
