@@ -1,3 +1,4 @@
+
 import Image from "next/image";
 import { PersonalContacts } from "@/components/app/PersonalContacts";
 import { UsefulLinks } from "@/components/app/UsefulLinks";
@@ -5,7 +6,7 @@ import { FeedbackForm } from "@/components/app/FeedbackForm";
 import { Section } from "@/components/app/Section";
 import { Separator } from "@/components/ui/separator";
 import type { PersonalContact, UsefulLink } from "@/types";
-import { Mail, Linkedin, Github, Globe, Rss, BookMarked } from "lucide-react"; // Example icons
+import { Mail, Linkedin, Github, Globe, BookOpenCheck, Users, Lightbulb, FileText, Landmark } from "lucide-react"; // Example icons, added new ones
 
 // Mock Data (replace with actual data fetching in a real app)
 const mockPersonalContacts: PersonalContact[] = [
@@ -16,33 +17,68 @@ const mockPersonalContacts: PersonalContact[] = [
 ];
 
 const mockUsefulLinks: UsefulLink[] = [
-  { 
-    id: "1", 
-    title: "Next.js Documentation", 
-    author: "Vercel", 
-    url: "https://nextjs.org/docs",
-    description: "The official documentation for Next.js, a React framework for PWA."
+  {
+    id: "1",
+    title: "NotebookLM",
+    author: "Google",
+    url: "https://notebooklm.google.com/",
+    description: "An AI-powered research and writing assistant to help you synthesize information and generate insights.",
+    icon: Lightbulb,
   },
-  { 
-    id: "2", 
-    title: "Tailwind CSS", 
-    author: "Tailwind Labs", 
-    url: "https://tailwindcss.com/docs",
-    description: "A utility-first CSS framework for rapid UI development."
+  {
+    id: "2",
+    title: "OpenStax",
+    author: "Rice University",
+    url: "https://openstax.org/",
+    description: "Access free, peer-reviewed, openly licensed textbooks for college and AP courses.",
+    icon: BookOpenCheck,
   },
-  { 
-    id: "3", 
-    title: "Shadcn/ui", 
-    url: "https://ui.shadcn.com/",
-    description: "Beautifully designed components that you can copy and paste into your apps."
+  {
+    id: "3",
+    title: "Khan Academy",
+    author: "Khan Academy",
+    url: "https://www.khanacademy.org/",
+    description: "Offers practice exercises, instructional videos, and a personalized learning dashboard.",
+    icon: Users,
   },
   {
     id: "4",
-    title: "Awesome Developer Resources",
-    url: "https://github.com/topics/awesome",
-    description: "A curated list of awesome lists for various development topics."
-  }
+    title: "Project Gutenberg",
+    author: "Various Volunteers",
+    url: "https://www.gutenberg.org/",
+    description: "A library of over 70,000 free eBooks, with a focus on older works for which U.S. copyright has expired.",
+    icon: FileText,
+  },
+  {
+    id: "5",
+    title: "MIT OpenCourseWare",
+    author: "MIT",
+    url: "https://ocw.mit.edu/",
+    description: "A web-based publication of virtually all MIT course content, open and available to the world.",
+    icon: Landmark,
+  },
+  {
+    id: "6",
+    title: "Next.js Documentation",
+    author: "Vercel",
+    url: "https://nextjs.org/docs",
+    description: "The official documentation for Next.js, a React framework for PWA."
+  },
+  {
+    id: "7",
+    title: "Tailwind CSS",
+    author: "Tailwind Labs",
+    url: "https://tailwindcss.com/docs",
+    description: "A utility-first CSS framework for rapid UI development."
+  },
+  {
+    id: "8",
+    title: "Shadcn/ui",
+    url: "https://ui.shadcn.com/",
+    description: "Beautifully designed components that you can copy and paste into your apps."
+  },
 ];
+
 
 export default function HomePage() {
   return (
@@ -77,7 +113,7 @@ export default function HomePage() {
 
         <Separator className="my-6 md:my-10 bg-border/70" />
 
-        <Section title="Curated Links" className="w-full">
+        <Section title="Curated Links & Resources" className="w-full">
           <UsefulLinks links={mockUsefulLinks} />
         </Section>
 

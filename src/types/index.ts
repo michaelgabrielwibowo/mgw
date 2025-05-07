@@ -1,3 +1,4 @@
+
 import type { LucideIcon } from 'lucide-react';
 
 export interface PersonalContact {
@@ -14,6 +15,7 @@ export interface UsefulLink {
   author?: string;
   url: string;
   description?: string;
+  icon?: LucideIcon; // Added optional icon for useful links
 }
 
 export interface CommentFeedback {
