@@ -23,7 +23,7 @@ export let usefulLinksData: UsefulLink[] = [
     url: "https://notebooklm.google.com/",
     description: "An AI-powered research and writing assistant to help you synthesize information and generate insights.",
     iconName: "Lightbulb",
-    category: "tool",
+    category: "web", // Was 'tool'
   },
   {
     id: "2",
@@ -49,8 +49,8 @@ export let usefulLinksData: UsefulLink[] = [
     author: "Various Volunteers",
     url: "https://www.gutenberg.org/",
     description: "A library of over 70,000 free eBooks, with a focus on older works for which U.S. copyright has expired.",
-    iconName: "BookOpen", // Changed icon
-    category: "book", // Changed category
+    iconName: "BookOpen",
+    category: "book",
   },
   {
     id: "5",
@@ -166,7 +166,7 @@ export let usefulLinksData: UsefulLink[] = [
     url: "https://www.youtube.com/watch?v=YoXxevp1WRQ",
     description: "A comprehensive introduction to computer science and programming by Harvard University, available on YouTube.",
     iconName: "Video",
-    category: "youtube_video",
+    category: "youtube", // Was 'youtube_video'
   },
   {
     id: "18",
@@ -175,6 +175,6 @@ export let usefulLinksData: UsefulLink[] = [
     url: "https://www.youtube.com/playlist?list=PL8dPuuaLjXtNlUrzyH5r6jN9ulIgZBpdo",
     description: "A YouTube playlist that covers a wide range of computer science topics in an accessible way.",
     iconName: "ListVideo",
-    category: "youtube_playlist",
+    category: "youtube", // Was 'youtube_playlist'
   },
 ];

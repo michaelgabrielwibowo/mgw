@@ -24,7 +24,7 @@ export interface UsefulLink {
   url: string;
   description?: string;
   iconName?: string; // Lucide icon name as string
-  category?: 'web' | 'repository' | 'learning' | 'tool' | 'book' | 'youtube_video' | 'youtube_playlist';
+  category?: 'web' | 'repository' | 'learning' | 'book' | 'youtube';
 }
 
 export interface CommentFeedback {

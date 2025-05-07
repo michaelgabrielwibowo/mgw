@@ -1,3 +1,4 @@
+
 "use client";
 import Link from 'next/link';
 import { ArrowLeft, ExternalLink, BookMarked, Lightbulb, BookOpenCheck, Users, FileText, Landmark, HelpCircle, Search, Github, Code, School, Award, Video, ListVideo, BookOpen, type LucideIcon } from 'lucide-react';
@@ -30,12 +31,10 @@ const iconMap: Record<string, LucideIcon> = {
 const categoryOptions = [
   { value: 'all', label: 'All Categories' },
   { value: 'learning', label: 'Learning & Education' },
-  { value: 'tool', label: 'Tools & Utilities' },
-  { value: 'web', label: 'Web Application / Site' },
-  { value: 'repository', label: 'Project Repository' },
+  { value: 'web', label: 'Websites & Tools' },
+  { value: 'repository', label: 'Project Repositories' },
   { value: 'book', label: 'Books' },
-  { value: 'youtube_video', label: 'YouTube Videos' },
-  { value: 'youtube_playlist', label: 'YouTube Playlists' },
+  { value: 'youtube', label: 'YouTube Content' },
 ];
 
 export default function UsefulLinksPage() {
