@@ -10,10 +10,9 @@ export let siteProfileData: SiteProfile = {
 };
 
 export let personalContactsData: PersonalContact[] = [
-  { id: "1", title: "Email", value: "michael.wibowo@example.com", url: "mailto:michael.wibowo@example.com", iconName: "Mail" },
-  { id: "2", title: "LinkedIn", value: "Michael G. Wibowo", url: "https://linkedin.com/in/michaelgwibowo", iconName: "Linkedin" },
-  { id: "3", title: "GitHub", value: "mikegwibowo", url: "https://github.com/mikegwibowo", iconName: "Github" },
-  { id: "4", title: "Portfolio", value: "mikegwibowo.dev", url: "https://mikegwibowo.dev", iconName: "Globe" },
+  { id: "1", title: "Email", value: "michaelgabrielwibowo@gmail.com", url: "mailto:michaelgabrielwibowo@gmail.com", iconName: "Mail" },
+  { id: "2", title: "LinkedIn", value: "Michael Gabriel Wibowo", url: "https://www.linkedin.com/in/michael-gabriel-wibowo", iconName: "Linkedin" },
+  { id: "3", title: "Telephone", value: "+(886) 936-147-487", url: "tel:+886936147487", iconName: "Telephone" },
 ];
 
 export let usefulLinksData: UsefulLink[] = [
