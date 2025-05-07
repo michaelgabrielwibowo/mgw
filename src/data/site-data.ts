@@ -1,5 +1,6 @@
 
 import type { SiteProfile, PersonalContact, UsefulLink } from '@/types';
+import type { SuggestedLink } from '@/ai/flows/suggest-useful-links-flow';
 
 export let siteProfileData: SiteProfile = {
   siteTitle: 'Michael Gabriel Wibowo | Personal Page',
@@ -95,7 +96,7 @@ export let usefulLinksData: UsefulLink[] = [
     url: "https://github.com/firebase/genkit",
     description: "The official GitHub repository for Genkit, a toolkit for building AI-powered applications.",
     iconName: "Github",
-    category: "repository",
+    category: "project_repository",
   },
   {
     id: "10",
@@ -122,7 +123,7 @@ export let usefulLinksData: UsefulLink[] = [
     url: "https://github.com/microsoft/vscode",
     description: "The GitHub repository for Visual Studio Code, a popular open-source code editor.",
     iconName: "Github",
-    category: "repository",
+    category: "project_repository",
   },
   {
     id: "13",
@@ -185,7 +186,7 @@ export let usefulLinksData: UsefulLink[] = [
     url: "https://github.com/tensorflow/tensorflow",
     description: "An end-to-end open source platform for machine learning. It has a comprehensive, flexible ecosystem of tools, libraries and community resources.",
     iconName: "Github",
-    category: "repository",
+    category: "project_repository",
   },
   {
     id: "20",
@@ -194,7 +195,7 @@ export let usefulLinksData: UsefulLink[] = [
     url: "https://github.com/torvalds/linux",
     description: "The official mirror of the Linux kernel source tree.",
     iconName: "Github",
-    category: "repository",
+    category: "project_repository",
   },
   {
     id: "21",
@@ -203,7 +204,7 @@ export let usefulLinksData: UsefulLink[] = [
     url: "https://github.com/electron/electron",
     description: "Build cross-platform desktop apps with JavaScript, HTML, and CSS.",
     iconName: "Github",
-    category: "repository",
+    category: "project_repository",
   },
   {
     id: "22",
@@ -212,7 +213,7 @@ export let usefulLinksData: UsefulLink[] = [
     url: "https://github.com/home-assistant/core",
     description: "Open source home automation that puts local control and privacy first.",
     iconName: "Github",
-    category: "repository",
+    category: "project_repository",
   },
   {
     id: "23",
@@ -221,21 +222,54 @@ export let usefulLinksData: UsefulLink[] = [
     url: "https://github.com/godotengine/godot",
     description: "A feature-packed, cross-platform game engine to create 2D and 3D games from a unified interface.",
     iconName: "Github",
-    category: "repository",
+    category: "project_repository",
+  },
+  {
+    id: "24",
+    title: "EveryCircuit",
+    author: "MuseMaze",
+    url: "https://everycircuit.com/",
+    description: "An online electronics simulator for designing and testing circuits.",
+    iconName: "Cpu",
+    category: "web",
   },
 ];
 
-// Function to simulate fetching new links (replace with actual API call in a real app)
-// This is a placeholder and would need to be implemented with a proper backend and AI integration.
-export async function fetchNewWeeklyLinks(existingLinks: UsefulLink[]): Promise<UsefulLink[]> {
-  console.log("Simulating fetching new weekly links. In a real app, this would call an AI service.");
-  // In a real application, this would:
-  // 1. Call a Genkit flow (e.g., `suggestUsefulLinksFlow`)
-  // 2. The flow would use an LLM to generate new link suggestions based on categories and existing links.
-  // 3. Ensure no duplicates are added.
 
-  // For now, returning an empty array as this is a frontend-only simulation.
-  // To see this in action, you'd need a backend service.
-  await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate network delay
-  return [];
+export function addSuggestedLinks(newLinks: SuggestedLink[]) {
+  const existingUrls = new Set(usefulLinksData.map(link => link.url));
+  let maxId = usefulLinksData.reduce((max, link) => Math.max(max, parseInt(link.id, 10)), 0);
+
+  newLinks.forEach(suggestedLink => {
+    if (!existingUrls.has(suggestedLink.url)) {
+      maxId++;
+      usefulLinksData.push({
+        id: maxId.toString(),
+        title: suggestedLink.title,
+        author: suggestedLink.author,
+        url: suggestedLink.url,
+        description: suggestedLink.description,
+        // Map iconKeywords to a specific iconName if needed, or use a default
+        // For now, let's try to find a generic icon or use HelpCircle
+        iconName: mapKeywordsToIcon(suggestedLink.iconKeywords) || "HelpCircle",
+        category: suggestedLink.category,
+      });
+      existingUrls.add(suggestedLink.url);
+    }
+  });
+}
+
+// Helper function to map keywords to a specific Lucide icon name
+// This is a basic example and can be expanded
+function mapKeywordsToIcon(keywords?: string): string | undefined {
+  if (!keywords) return undefined;
+  const lowerKeywords = keywords.toLowerCase();
+  if (lowerKeywords.includes("code") || lowerKeywords.includes("repository")) return "Github";
+  if (lowerKeywords.includes("video") || lowerKeywords.includes("playlist")) return "Youtube";
+  if (lowerKeywords.includes("book")) return "BookOpen";
+  if (lowerKeywords.includes("learn") || lowerKeywords.includes("education")) return "School";
+  if (lowerKeywords.includes("tool") || lowerKeywords.includes("utility")) return "Tool";
+  if (lowerKeywords.includes("web") || lowerKeywords.includes("site")) return "Globe";
+  if (lowerKeywords.includes("circuit") || lowerKeywords.includes("electronic")) return "Cpu";
+  return "Link"; // Default icon
 }

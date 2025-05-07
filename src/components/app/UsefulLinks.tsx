@@ -1,3 +1,4 @@
+
 "use client";
 
 import type { UsefulLink } from "@/types";
@@ -22,6 +23,7 @@ import {
   Video, 
   ListVideo, 
   BookOpen,
+  Cpu, // Added Cpu icon
   type LucideIcon,
 } from "lucide-react";
 import Link from "next/link";
@@ -46,6 +48,7 @@ const iconMap: Record<string, LucideIcon> = {
   Video,
   ListVideo,
   BookOpen,
+  Cpu, // Added Cpu icon
 };
 
 const INITIAL_VISIBLE_LINKS = 4;
@@ -126,3 +129,4 @@ export function UsefulLinks({ links }: UsefulLinksProps) {
     </>
   );
 }
+

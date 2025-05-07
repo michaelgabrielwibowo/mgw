@@ -1,7 +1,7 @@
 
 "use client";
 import Link from 'next/link';
-import { ArrowLeft, ExternalLink, BookMarked, Lightbulb, BookOpenCheck, Users, FileText, Landmark, HelpCircle, Search, Github, Code, School, Award, Video, ListVideo, BookOpen, type LucideIcon } from 'lucide-react';
+import { ArrowLeft, ExternalLink, BookMarked, Lightbulb, BookOpenCheck, Users, FileText, Landmark, HelpCircle, Search, Github, Code, School, Award, Video, ListVideo, BookOpen, Cpu, type LucideIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Section } from '@/components/app/Section';
@@ -10,6 +10,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useState, useMemo, useEffect } from 'react';
 import { usefulLinksData, siteProfileData } from '@/data/site-data'; 
 import type { UsefulLink } from '@/types'; 
+import { suggestUsefulLinks, type SuggestUsefulLinksInput } from '@/ai/flows/suggest-useful-links-flow';
+import { useToast } from '@/hooks/use-toast';
+import { Loader2 } from 'lucide-react';
 
 const iconMap: Record<string, LucideIcon> = {
   Lightbulb,
@@ -26,13 +29,14 @@ const iconMap: Record<string, LucideIcon> = {
   Video,
   ListVideo,
   BookOpen,
+  Cpu, // Added Cpu icon
 };
 
 const categoryOptions = [
   { value: 'all', label: 'All Categories' },
   { value: 'learning', label: 'Learning & Education' },
   { value: 'web', label: 'Websites & Tools' },
-  { value: 'repository', label: 'Project Repositories' },
+  { value: 'project_repository', label: 'Project Repositories' },
   { value: 'book', label: 'Books' },
   { value: 'youtube', label: 'YouTube Content' },
 ];
@@ -41,6 +45,10 @@ export default function UsefulLinksPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [currentTime, setCurrentTime] = useState<string | null>(null);
+  const [links, setLinks] = useState<UsefulLink[]>(usefulLinksData);
+  const [isLoadingNewLinks, setIsLoadingNewLinks] = useState(false);
+  const { toast } = useToast();
+
 
   useEffect(() => {
     setCurrentTime(new Date().getFullYear().toString());
@@ -48,10 +56,12 @@ export default function UsefulLinksPage() {
 
 
   const filteredLinks = useMemo(() => {
-    return usefulLinksData
+    return links
       .filter(link => {
         if (selectedCategory === 'all') return true;
-        return link.category === selectedCategory;
+        // Ensure consistent category naming (e.g. project_repository vs repository)
+        const linkCategory = link.category === 'repository' ? 'project_repository' : link.category;
+        return linkCategory === selectedCategory;
       })
       .filter(link => {
         const term = searchTerm.toLowerCase();
@@ -61,7 +71,66 @@ export default function UsefulLinksPage() {
           (link.description && link.description.toLowerCase().includes(term))
         );
       });
-  }, [searchTerm, selectedCategory]);
+  }, [searchTerm, selectedCategory, links]);
+
+  const handleSuggestNewLinks = async () => {
+    setIsLoadingNewLinks(true);
+    try {
+      const input: SuggestUsefulLinksInput = {
+        existingLinks: links.map(l => ({ title: l.title, url: l.url })),
+      };
+      const result = await suggestUsefulLinks(input);
+      
+      if (result && result.suggestedLinks) {
+        const newLinksToAdd: UsefulLink[] = result.suggestedLinks.map((sl, index) => ({
+          id: `suggested-${Date.now()}-${index}`, // Generate a unique ID
+          title: sl.title,
+          author: sl.author,
+          url: sl.url,
+          description: sl.description,
+          iconName: mapKeywordsToIcon(sl.iconKeywords) || 'HelpCircle',
+          category: sl.category,
+        }));
+
+        // Filter out duplicates based on URL before adding
+        const uniqueNewLinks = newLinksToAdd.filter(nl => !links.some(existingLink => existingLink.url === nl.url));
+        
+        setLinks(prevLinks => [...prevLinks, ...uniqueNewLinks]);
+        toast({
+          title: "New Links Suggested!",
+          description: `${uniqueNewLinks.length} new unique links have been added.`,
+        });
+      } else {
+        toast({
+          title: "No New Links",
+          description: "The AI couldn't find any new links this time, or there was an issue.",
+          variant: "default"
+        });
+      }
+    } catch (error) {
+      console.error("Failed to suggest new links:", error);
+      toast({
+        title: "Error Suggesting Links",
+        description: "Could not fetch new link suggestions. Please try again later.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoadingNewLinks(false);
+    }
+  };
+
+  function mapKeywordsToIcon(keywords?: string): string | undefined {
+    if (!keywords) return undefined;
+    const lowerKeywords = keywords.toLowerCase();
+    if (lowerKeywords.includes("code") || lowerKeywords.includes("repository")) return "Github";
+    if (lowerKeywords.includes("video") || lowerKeywords.includes("playlist")) return "Youtube"; // Lucide does not have Youtube icon, ensure it's available or mapped.
+    if (lowerKeywords.includes("book")) return "BookOpen";
+    if (lowerKeywords.includes("learn") || lowerKeywords.includes("education")) return "School";
+    if (lowerKeywords.includes("tool") || lowerKeywords.includes("utility") || lowerKeywords.includes("web") || lowerKeywords.includes("site") ) return "Globe";
+    if (lowerKeywords.includes("circuit") || lowerKeywords.includes("electronic")) return "Cpu";
+    return "Link"; // Default icon
+  }
+
 
   if (currentTime === null) {
     return (
@@ -74,12 +143,20 @@ export default function UsefulLinksPage() {
   return (
     <div className="flex flex-col min-h-screen">
       <main className="flex-grow container mx-auto px-4 py-8 md:px-6 md:py-12 max-w-4xl">
-        <div className="mb-8 flex items-center justify-between">
+        <div className="mb-8 flex items-center justify-between flex-wrap gap-4">
           <Button asChild variant="outline" className="border-primary text-primary hover:bg-primary/10">
             <Link href="/">
               <ArrowLeft className="mr-2 h-4 w-4" />
               Back to Home
             </Link>
+          </Button>
+          <Button onClick={handleSuggestNewLinks} disabled={isLoadingNewLinks} variant="default" className="bg-primary hover:bg-primary/90 text-primary-foreground">
+            {isLoadingNewLinks ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <Lightbulb className="mr-2 h-4 w-4" />
+            )}
+            Suggest New Links
           </Button>
         </div>
         
@@ -161,3 +238,4 @@ export default function UsefulLinksPage() {
     </div>
   );
 }
+
