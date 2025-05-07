@@ -3,17 +3,19 @@ import type { PersonalContact } from "@/types";
 import { Card, CardContent } from "@/components/ui/card";
 import Link from "next/link";
 import { Mail, Linkedin, Github, Globe, type LucideIcon, HelpCircle } from "lucide-react";
+import { FaWhatsapp } from 'react-icons/fa'; // Import WhatsApp icon
 
 interface PersonalContactsProps {
   contacts: PersonalContact[];
 }
 
-const iconMap: Record<string, LucideIcon> = {
+const iconMap: Record<string, LucideIcon | React.ComponentType> = {
   Mail,
   Linkedin,
   Github,
   Globe,
   HelpCircle, // Default icon
+  Whatsapp: FaWhatsapp,
 };
 
 export function PersonalContacts({ contacts }: PersonalContactsProps) {
@@ -29,7 +31,11 @@ export function PersonalContacts({ contacts }: PersonalContactsProps) {
           <Card key={contact.id} className="hover:shadow-lg transition-shadow duration-300 ease-in-out bg-card">
             <Link href={contact.url} target="_blank" rel="noopener noreferrer" passHref>
               <CardContent className="p-6 flex flex-col items-center text-center">
-                <IconComponent className="w-10 h-10 mb-4 text-accent" />
+                {typeof IconComponent === 'function' ? (
+                  <IconComponent className="w-10 h-10 mb-4 text-accent" />
+                ) : (
+                  <HelpCircle className="w-10 h-10 mb-4 text-accent" />
+                )}
                 <h3 className="text-lg font-medium text-card-foreground mb-1">{contact.title}</h3>
                 <p className="text-sm text-muted-foreground break-all">{contact.value}</p>
               </CardContent>
@@ -40,3 +46,4 @@ export function PersonalContacts({ contacts }: PersonalContactsProps) {
     </div>
   );
 }
+
