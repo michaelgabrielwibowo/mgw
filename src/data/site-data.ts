@@ -1,3 +1,4 @@
+
 import type { SiteProfile, PersonalContact, UsefulLink } from '@/types';
 
 export let siteProfileData: SiteProfile = {
@@ -23,7 +24,7 @@ export let usefulLinksData: UsefulLink[] = [
     url: "https://notebooklm.google.com/",
     description: "An AI-powered research and writing assistant to help you synthesize information and generate insights.",
     iconName: "Lightbulb",
-    category: "web", // Was 'tool'
+    category: "web",
   },
   {
     id: "2",
@@ -166,7 +167,7 @@ export let usefulLinksData: UsefulLink[] = [
     url: "https://www.youtube.com/watch?v=YoXxevp1WRQ",
     description: "A comprehensive introduction to computer science and programming by Harvard University, available on YouTube.",
     iconName: "Video",
-    category: "youtube", // Was 'youtube_video'
+    category: "youtube",
   },
   {
     id: "18",
@@ -175,6 +176,66 @@ export let usefulLinksData: UsefulLink[] = [
     url: "https://www.youtube.com/playlist?list=PL8dPuuaLjXtNlUrzyH5r6jN9ulIgZBpdo",
     description: "A YouTube playlist that covers a wide range of computer science topics in an accessible way.",
     iconName: "ListVideo",
-    category: "youtube", // Was 'youtube_playlist'
+    category: "youtube",
+  },
+  {
+    id: "19",
+    title: "TensorFlow GitHub Repository",
+    author: "Google",
+    url: "https://github.com/tensorflow/tensorflow",
+    description: "An end-to-end open source platform for machine learning. It has a comprehensive, flexible ecosystem of tools, libraries and community resources.",
+    iconName: "Github",
+    category: "repository",
+  },
+  {
+    id: "20",
+    title: "Linux Kernel GitHub Mirror",
+    author: "Linus Torvalds & Community",
+    url: "https://github.com/torvalds/linux",
+    description: "The official mirror of the Linux kernel source tree.",
+    iconName: "Github",
+    category: "repository",
+  },
+  {
+    id: "21",
+    title: "Electron GitHub Repository",
+    author: "OpenJS Foundation",
+    url: "https://github.com/electron/electron",
+    description: "Build cross-platform desktop apps with JavaScript, HTML, and CSS.",
+    iconName: "Github",
+    category: "repository",
+  },
+  {
+    id: "22",
+    title: "Home Assistant Core GitHub",
+    author: "Home Assistant Community",
+    url: "https://github.com/home-assistant/core",
+    description: "Open source home automation that puts local control and privacy first.",
+    iconName: "Github",
+    category: "repository",
+  },
+  {
+    id: "23",
+    title: "Godot Engine GitHub Repository",
+    author: "Godot Engine Community",
+    url: "https://github.com/godotengine/godot",
+    description: "A feature-packed, cross-platform game engine to create 2D and 3D games from a unified interface.",
+    iconName: "Github",
+    category: "repository",
   },
 ];
+
+// Function to simulate fetching new links (replace with actual API call in a real app)
+// This is a placeholder and would need to be implemented with a proper backend and AI integration.
+export async function fetchNewWeeklyLinks(existingLinks: UsefulLink[]): Promise<UsefulLink[]> {
+  console.log("Simulating fetching new weekly links. In a real app, this would call an AI service.");
+  // In a real application, this would:
+  // 1. Call a Genkit flow (e.g., `suggestUsefulLinksFlow`)
+  // 2. The flow would use an LLM to generate new link suggestions based on categories and existing links.
+  // 3. Ensure no duplicates are added.
+
+  // For now, returning an empty array as this is a frontend-only simulation.
+  // To see this in action, you'd need a backend service.
+  await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate network delay
+  return [];
+}
