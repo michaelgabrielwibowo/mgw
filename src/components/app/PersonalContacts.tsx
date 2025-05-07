@@ -2,21 +2,23 @@
 import type { PersonalContact } from "@/types";
 import { Card, CardContent } from "@/components/ui/card";
 import Link from "next/link";
-import { Mail, Linkedin, Globe, HelpCircle, type LucideIcon } from 'lucide-react';
-import { FaWhatsapp } from 'react-icons/fa'; // Import WhatsApp icon
+import { Globe, HelpCircle, type LucideIcon } from 'lucide-react';
+import { GoMail } from 'react-icons/go';
+import { BsWhatsapp } from 'react-icons/bs';
+import { FaLinkedin } from 'react-icons/fa';
 
 interface PersonalContactsProps {
   contacts: PersonalContact[];
 }
-
+ 
 const iconMap: Record<string, LucideIcon | React.ComponentType> = {
-  Mail,
-  Linkedin,
+  Mail: GoMail,
+  Linkedin: FaLinkedin, // Changed GoLink to FaLinkedin
   Globe,
   HelpCircle, // Default icon
-  Whatsapp: FaWhatsapp,
+  Whatsapp: BsWhatsapp,
 };
-
+ 
 export function PersonalContacts({ contacts }: PersonalContactsProps) {
   if (!contacts || contacts.length === 0) {
     return <p className="text-muted-foreground text-center">No contact information available.</p>;
@@ -26,7 +28,8 @@ export function PersonalContacts({ contacts }: PersonalContactsProps) {
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
       {contacts.map((contact) => {
         const IconComponent = contact.iconName ? (iconMap[contact.iconName] || HelpCircle) : HelpCircle;
-        return (
+        
+        return ( 
           <Card key={contact.id} className="hover:shadow-lg transition-shadow duration-300 ease-in-out bg-card">
             <Link href={contact.url} target="_blank" rel="noopener noreferrer" passHref>
               <CardContent className="p-6 flex flex-col items-center text-center">
@@ -45,5 +48,3 @@ export function PersonalContacts({ contacts }: PersonalContactsProps) {
     </div>
   );
 }
-
-
