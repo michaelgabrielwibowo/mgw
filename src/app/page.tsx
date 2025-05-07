@@ -23,6 +23,7 @@ const mockUsefulLinks: UsefulLink[] = [
     url: "https://notebooklm.google.com/",
     description: "An AI-powered research and writing assistant to help you synthesize information and generate insights.",
     iconName: "Lightbulb",
+    category: "web",
   },
   {
     id: "2",
@@ -31,6 +32,7 @@ const mockUsefulLinks: UsefulLink[] = [
     url: "https://openstax.org/",
     description: "Access free, peer-reviewed, openly licensed textbooks for college and AP courses.",
     iconName: "BookOpenCheck",
+    category: "web",
   },
   {
     id: "3",
@@ -39,6 +41,7 @@ const mockUsefulLinks: UsefulLink[] = [
     url: "https://www.khanacademy.org/",
     description: "Offers practice exercises, instructional videos, and a personalized learning dashboard.",
     iconName: "Users",
+    category: "web",
   },
   {
     id: "4",
@@ -47,6 +50,7 @@ const mockUsefulLinks: UsefulLink[] = [
     url: "https://www.gutenberg.org/",
     description: "A library of over 70,000 free eBooks, with a focus on older works for which U.S. copyright has expired.",
     iconName: "FileText",
+    category: "web",
   },
   {
     id: "5",
@@ -55,6 +59,7 @@ const mockUsefulLinks: UsefulLink[] = [
     url: "https://ocw.mit.edu/",
     description: "A web-based publication of virtually all MIT course content, open and available to the world.",
     iconName: "Landmark",
+    category: "web",
   },
   {
     id: "6",
@@ -62,7 +67,8 @@ const mockUsefulLinks: UsefulLink[] = [
     author: "Vercel",
     url: "https://nextjs.org/docs",
     description: "The official documentation for Next.js, a React framework for PWA.",
-    iconName: "BookMarked" // Default icon if others are not specified
+    iconName: "BookMarked",
+    category: "web",
   },
   {
     id: "7",
@@ -70,14 +76,34 @@ const mockUsefulLinks: UsefulLink[] = [
     author: "Tailwind Labs",
     url: "https://tailwindcss.com/docs",
     description: "A utility-first CSS framework for rapid UI development.",
-    iconName: "BookMarked" // Default icon
+    iconName: "BookMarked",
+    category: "web",
   },
   {
     id: "8",
     title: "Shadcn/ui",
     url: "https://ui.shadcn.com/",
     description: "Beautifully designed components that you can copy and paste into your apps.",
-    iconName: "BookMarked" // Default icon
+    iconName: "BookMarked",
+    category: "web",
+  },
+  {
+    id: "9",
+    title: "Genkit GitHub Repository",
+    author: "Google",
+    url: "https://github.com/firebase/genkit",
+    description: "The official GitHub repository for Genkit, a toolkit for building AI-powered applications.",
+    iconName: "Github",
+    category: "repository",
+  },
+  {
+    id: "10",
+    title: "Mozilla Developer Network (MDN)",
+    author: "Mozilla",
+    url: "https://developer.mozilla.org/",
+    description: "Comprehensive documentation for web standards and technologies.",
+    iconName: "BookOpenCheck",
+    category: "web",
   },
 ];
 
@@ -133,3 +159,4 @@ export default function HomePage() {
     </div>
   );
 }
+

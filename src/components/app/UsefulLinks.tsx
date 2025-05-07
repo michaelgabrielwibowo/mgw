@@ -1,3 +1,4 @@
+
 "use client";
 
 import type { UsefulLink } from "@/types";
@@ -15,6 +16,7 @@ import {
   Landmark,
   HelpCircle, // Fallback icon
   ArrowRight, // Added for the new button
+  Github, // Added Github icon
   type LucideIcon,
 } from "lucide-react";
 import Link from "next/link";
@@ -30,8 +32,9 @@ const iconMap: Record<string, LucideIcon> = {
   Users,
   FileText,
   Landmark,
-  BookMarked, // Default/fallback for links without specific icons
-  HelpCircle, // Generic fallback
+  BookMarked, 
+  HelpCircle, 
+  Github,
 };
 
 const INITIAL_VISIBLE_LINKS = 4;
@@ -99,16 +102,17 @@ export function UsefulLinks({ links }: UsefulLinksProps) {
             {allLinksShown ? <ChevronUp className="ml-2 h-4 w-4" /> : <ChevronDown className="ml-2 h-4 w-4" />}
           </Button>
           
-          {allLinksShown && (
+          
             <Button asChild variant="default" className="bg-primary hover:bg-primary/90 text-primary-foreground">
               <Link href="/useful-links">
-                View All Links Page
+                View All Links & Filter
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
             </Button>
-          )}
+          
         </div>
       )}
     </>
   );
 }
+

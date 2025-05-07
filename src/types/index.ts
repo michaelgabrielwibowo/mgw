@@ -16,6 +16,7 @@ export interface UsefulLink {
   url: string;
   description?: string;
   iconName?: string; // Changed from LucideIcon to string
+  category?: 'web' | 'repository'; // Added category field
 }
 
 export interface CommentFeedback {
@@ -28,3 +29,4 @@ export interface CommentFeedback {
 }
 
 export type FeedbackFormData = Omit<CommentFeedback, 'id' | 'commented_at'>;
+
