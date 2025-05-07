@@ -13,7 +13,7 @@ import { z } from 'genkit';
 
 const ExistingLinkSchema = z.object({
   title: z.string().describe('The title of an existing link.'),
-  url: z.string().url().describe('The URL of an existing link.'),
+  url: z.string().describe('The URL of an existing link.'),
 });
 
 const SuggestUsefulLinksInputSchema = z.object({
@@ -27,7 +27,7 @@ export type SuggestUsefulLinksInput = z.infer<
 
 const SuggestedLinkSchema = z.object({
   title: z.string().describe('The clear and concise title of the suggested link.'),
-  url: z.string().url().describe('The direct URL to the resource.'),
+  url: z.string().describe('The direct URL to the resource. Must be a valid URL.'),
   author: z.string().optional().describe('The author, creator, or organization, if applicable.'),
   description: z.string().describe('A brief, informative description (1-2 sentences).'),
   category: z
@@ -76,7 +76,7 @@ const prompt = ai.definePrompt({
 
 For each link, you MUST provide the following information in the exact specified format:
 -   title: A clear and concise title for the link.
--   url: The direct and valid URL to the resource.
+-   url: The direct and valid URL to the resource. Ensure this is a functional HTTP/HTTPS URL.
 -   author: The author, creator, or organization primarily responsible for the content. If not applicable or easily identifiable, you may omit this.
 -   description: A brief, informative description (1-2 sentences) summarizing the link's content or purpose.
 -   category: Assign one of the specified categories: 'project_repository', 'website', 'book', 'youtube'.
