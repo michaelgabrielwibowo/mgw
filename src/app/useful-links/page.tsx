@@ -1,16 +1,16 @@
 
 "use client";
 import Link from 'next/link';
-import { ArrowLeft, ExternalLink, BookMarked, Lightbulb, BookOpenCheck, Users, FileText, Landmark, HelpCircle, Search, Github, Code, School, Award, Video, ListVideo, BookOpen, Cpu, type LucideIcon } from 'lucide-react';
+import { ArrowLeft, ExternalLink, BookMarked, Lightbulb, BookOpenCheck, Users, FileText, Landmark, HelpCircle, Search, Github, Code, School, Award, Video, ListVideo, BookOpen, Cpu, Globe, type LucideIcon, Sparkles, TrendingUp, Eye } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Section } from '@/components/app/Section';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useState, useMemo, useEffect } from 'react';
-import { usefulLinksData, siteProfileData } from '@/data/site-data'; 
+import { usefulLinksData as initialUsefulLinksData, siteProfileData, addSuggestedLinks as addNewLinksToDataStore } from '@/data/site-data'; 
 import type { UsefulLink } from '@/types'; 
-import { suggestUsefulLinks, type SuggestUsefulLinksInput } from '@/ai/flows/suggest-useful-links-flow';
+import { suggestUsefulLinks, type SuggestUsefulLinksInput, type SuggestedLink } from '@/ai/flows/suggest-useful-links-flow';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
 
@@ -26,14 +26,23 @@ const iconMap: Record<string, LucideIcon> = {
   Code,
   School,
   Award,
-  Video,
-  ListVideo,
+  Video, // Generic video icon
+  ListVideo, // YouTube playlist like icon
   BookOpen,
-  Cpu, // Added Cpu icon
+  Cpu,
+  Globe, // For websites
+  Youtube: Video, // Map Youtube keyword specifically if needed, Lucide has 'Youtube' but it's a brand icon. Using generic 'Video'.
+  Link: ExternalLink, // Default for generic links
+  Sparkles, // For "Newest" or "Newly Added"
+  TrendingUp, // For "Most Popular"
+  Eye, // Could be used for "View Added" button
 };
 
-const categoryOptions = [
+const filterOptions = [
   { value: 'all', label: 'All Categories' },
+  { value: 'newest', label: 'Newest First' },
+  { value: 'popular', label: 'Most Popular' },
+  { value: 'newly_added', label: 'Recently Suggested'}, // For toast action target
   { value: 'learning', label: 'Learning & Education' },
   { value: 'web', label: 'Websites & Tools' },
   { value: 'project_repository', label: 'Project Repositories' },
@@ -41,12 +50,20 @@ const categoryOptions = [
   { value: 'youtube', label: 'YouTube Content' },
 ];
 
+// Helper to get category label
+const getCategoryLabel = (value?: string) => {
+  const option = filterOptions.find(opt => opt.value === value);
+  return option ? option.label : (value ? value.charAt(0).toUpperCase() + value.slice(1) : "Link");
+};
+
+
 export default function UsefulLinksPage() {
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [selectedFilter, setSelectedFilter] = useState('all');
   const [currentTime, setCurrentTime] = useState<string | null>(null);
-  const [links, setLinks] = useState<UsefulLink[]>(usefulLinksData);
+  const [links, setLinks] = useState<UsefulLink[]>(initialUsefulLinksData.map(link => ({...link, createdAt: new Date(link.createdAt) }))); // Ensure createdAt is Date object
   const [isLoadingNewLinks, setIsLoadingNewLinks] = useState(false);
+  const [newlyAddedLinkIds, setNewlyAddedLinkIds] = useState<string[]>([]);
   const { toast } = useToast();
 
 
@@ -56,22 +73,36 @@ export default function UsefulLinksPage() {
 
 
   const filteredLinks = useMemo(() => {
-    return links
-      .filter(link => {
-        if (selectedCategory === 'all') return true;
-        // Ensure consistent category naming (e.g. project_repository vs repository)
-        const linkCategory = link.category === 'repository' ? 'project_repository' : link.category;
-        return linkCategory === selectedCategory;
-      })
-      .filter(link => {
-        const term = searchTerm.toLowerCase();
-        return (
-          link.title.toLowerCase().includes(term) ||
-          (link.author && link.author.toLowerCase().includes(term)) ||
-          (link.description && link.description.toLowerCase().includes(term))
-        );
+    let processedLinks = [...links];
+
+    // Apply search term first
+    if (searchTerm) {
+      const term = searchTerm.toLowerCase();
+      processedLinks = processedLinks.filter(link => 
+        link.title.toLowerCase().includes(term) ||
+        (link.author && link.author.toLowerCase().includes(term)) ||
+        (link.description && link.description.toLowerCase().includes(term))
+      );
+    }
+    
+    // Handle special filters or sort
+    if (selectedFilter === 'newest') {
+      processedLinks.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+    } else if (selectedFilter === 'popular') {
+      processedLinks.sort((a, b) => b.popularity - a.popularity);
+    } else if (selectedFilter === 'newly_added') {
+      processedLinks = processedLinks.filter(link => newlyAddedLinkIds.includes(link.id))
+                                     .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+    } else if (selectedFilter !== 'all') {
+      // Category filtering
+      processedLinks = processedLinks.filter(link => {
+        const linkCategory = link.category;
+        return linkCategory === selectedFilter;
       });
-  }, [searchTerm, selectedCategory, links]);
+    }
+
+    return processedLinks;
+  }, [searchTerm, selectedFilter, links, newlyAddedLinkIds]);
 
   const handleSuggestNewLinks = async () => {
     setIsLoadingNewLinks(true);
@@ -82,24 +113,42 @@ export default function UsefulLinksPage() {
       const result = await suggestUsefulLinks(input);
       
       if (result && result.suggestedLinks) {
-        const newLinksToAdd: UsefulLink[] = result.suggestedLinks.map((sl, index) => ({
-          id: `suggested-${Date.now()}-${index}`, // Generate a unique ID
-          title: sl.title,
-          author: sl.author,
-          url: sl.url,
-          description: sl.description,
-          iconName: mapKeywordsToIcon(sl.iconKeywords) || 'HelpCircle',
-          category: sl.category,
-        }));
+        // The addSuggestedLinks function in site-data.ts now returns the added links
+        const addedLinks: UsefulLink[] = addNewLinksToDataStore(result.suggestedLinks as SuggestedLink[]);
 
-        // Filter out duplicates based on URL before adding
-        const uniqueNewLinks = newLinksToAdd.filter(nl => !links.some(existingLink => existingLink.url === nl.url));
-        
-        setLinks(prevLinks => [...prevLinks, ...uniqueNewLinks]);
-        toast({
-          title: "New Links Suggested!",
-          description: `${uniqueNewLinks.length} new unique links have been added.`,
-        });
+        if (addedLinks.length > 0) {
+          setLinks(prevLinks => {
+            const updatedLinks = [...prevLinks];
+            addedLinks.forEach(newLink => {
+              if (!updatedLinks.some(ul => ul.id === newLink.id)) {
+                 updatedLinks.push({...newLink, createdAt: new Date(newLink.createdAt) }); // Ensure Date object
+              }
+            });
+            return updatedLinks;
+          });
+
+          setNewlyAddedLinkIds(addedLinks.map(l => l.id));
+          
+          toast({
+            title: "New Links Suggested!",
+            description: `${addedLinks.length} new unique links have been added.`,
+            action: (
+              <Button variant="outline" size="sm" onClick={() => {
+                setSelectedFilter('newly_added');
+                // Scroll to top or to the links section might be good UX here
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}>
+                <Eye className="mr-2 h-4 w-4" /> View Added
+              </Button>
+            )
+          });
+        } else {
+          toast({
+            title: "No New Links",
+            description: "The AI couldn't find any new links this time, or they were duplicates of existing ones.",
+            variant: "default"
+          });
+        }
       } else {
         toast({
           title: "No New Links",
@@ -118,24 +167,20 @@ export default function UsefulLinksPage() {
       setIsLoadingNewLinks(false);
     }
   };
-
-  function mapKeywordsToIcon(keywords?: string): string | undefined {
-    if (!keywords) return undefined;
-    const lowerKeywords = keywords.toLowerCase();
-    if (lowerKeywords.includes("code") || lowerKeywords.includes("repository")) return "Github";
-    if (lowerKeywords.includes("video") || lowerKeywords.includes("playlist")) return "Youtube"; // Lucide does not have Youtube icon, ensure it's available or mapped.
-    if (lowerKeywords.includes("book")) return "BookOpen";
-    if (lowerKeywords.includes("learn") || lowerKeywords.includes("education")) return "School";
-    if (lowerKeywords.includes("tool") || lowerKeywords.includes("utility") || lowerKeywords.includes("web") || lowerKeywords.includes("site") ) return "Globe";
-    if (lowerKeywords.includes("circuit") || lowerKeywords.includes("electronic")) return "Cpu";
-    return "Link"; // Default icon
-  }
+  
+  const handleFilterChange = (value: string) => {
+    if (selectedFilter === 'newly_added' && value !== 'newly_added') {
+      setNewlyAddedLinkIds([]); // Clear newly added if filter changes away from it
+    }
+    setSelectedFilter(value);
+  };
 
 
   if (currentTime === null) {
     return (
       <div className="flex flex-col min-h-screen items-center justify-center">
-        <p>Loading page...</p>
+        <Loader2 className="h-12 w-12 animate-spin text-primary" />
+        <p className="mt-4 text-muted-foreground">Loading page...</p>
       </div>
     );
   }
@@ -173,15 +218,18 @@ export default function UsefulLinksPage() {
                 />
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
               </div>
-              <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+              <Select value={selectedFilter} onValueChange={handleFilterChange}>
                 <SelectTrigger className="w-full sm:w-[220px] bg-background border-input focus:border-primary">
-                  <SelectValue placeholder="Filter by category" />
+                  <SelectValue placeholder="Filter or Sort" />
                 </SelectTrigger>
                 <SelectContent>
-                  {categoryOptions.map(option => (
-                    <SelectItem key={option.value} value={option.value}>
-                      {option.label}
-                    </SelectItem>
+                  {filterOptions.map(option => (
+                     // Hide "Recently Suggested" if no links were recently suggested via toast action
+                    (option.value === 'newly_added' && newlyAddedLinkIds.length === 0 && selectedFilter !== 'newly_added') ? null : (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    )
                   ))}
                 </SelectContent>
               </Select>
@@ -193,20 +241,30 @@ export default function UsefulLinksPage() {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {filteredLinks.map((link) => {
-                const IconComponent = link.iconName ? (iconMap[link.iconName] || iconMap["HelpCircle"]) : iconMap["HelpCircle"];
+                let IconComp = iconMap["Link"]; // Default icon
+                if (selectedFilter === 'newly_added' && newlyAddedLinkIds.includes(link.id)) {
+                  IconComp = iconMap["Sparkles"];
+                } else if (selectedFilter === 'newest') {
+                    IconComp = iconMap["Sparkles"];
+                } else if (selectedFilter === 'popular') {
+                    IconComp = iconMap["TrendingUp"];
+                } else if (link.iconName && iconMap[link.iconName]) {
+                  IconComp = iconMap[link.iconName];
+                }
+                
                 return (
                   <Card key={link.id} className="flex flex-col bg-card hover:shadow-xl transition-shadow duration-300 ease-in-out">
                     <CardHeader>
                       <div className="flex items-start gap-3">
-                        <IconComponent className="w-6 h-6 mt-1 text-accent flex-shrink-0" />
+                        <IconComp className="w-6 h-6 mt-1 text-accent flex-shrink-0" />
                         <div className="flex-grow">
                           <CardTitle className="text-xl text-primary">{link.title}</CardTitle>
                           {link.author && <CardDescription>By {link.author}</CardDescription>}
-                          {link.category && (
-                            <CardDescription className="text-xs mt-1">
-                              Category: <span className="font-semibold">{categoryOptions.find(c => c.value === link.category)?.label || link.category}</span>
-                            </CardDescription>
-                          )}
+                           <CardDescription className="text-xs mt-1">
+                              Category: <span className="font-semibold">{getCategoryLabel(link.category)}</span>
+                              {selectedFilter === 'newest' && <span className="ml-2 text-muted-foreground">({link.createdAt.toLocaleDateString()})</span>}
+                              {selectedFilter === 'popular' && <span className="ml-2 text-muted-foreground">(Popularity: {link.popularity})</span>}
+                           </CardDescription>
                         </div>
                       </div>
                     </CardHeader>

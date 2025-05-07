@@ -26,6 +26,8 @@ export let usefulLinksData: UsefulLink[] = [
     description: "An AI-powered research and writing assistant to help you synthesize information and generate insights.",
     iconName: "Lightbulb",
     category: "web",
+    createdAt: new Date("2023-01-01T10:00:00Z"),
+    popularity: 85,
   },
   {
     id: "2",
@@ -35,6 +37,8 @@ export let usefulLinksData: UsefulLink[] = [
     description: "Access free, peer-reviewed, openly licensed textbooks for college and AP courses.",
     iconName: "BookOpenCheck",
     category: "learning",
+    createdAt: new Date("2023-01-10T10:00:00Z"),
+    popularity: 90,
   },
   {
     id: "3",
@@ -44,6 +48,8 @@ export let usefulLinksData: UsefulLink[] = [
     description: "Offers practice exercises, instructional videos, and a personalized learning dashboard.",
     iconName: "Users",
     category: "learning",
+    createdAt: new Date("2023-02-01T10:00:00Z"),
+    popularity: 95,
   },
   {
     id: "4",
@@ -53,6 +59,8 @@ export let usefulLinksData: UsefulLink[] = [
     description: "A library of over 70,000 free eBooks, with a focus on older works for which U.S. copyright has expired.",
     iconName: "BookOpen",
     category: "book",
+    createdAt: new Date("2023-02-15T10:00:00Z"),
+    popularity: 80,
   },
   {
     id: "5",
@@ -62,6 +70,8 @@ export let usefulLinksData: UsefulLink[] = [
     description: "A web-based publication of virtually all MIT course content, open and available to the world.",
     iconName: "Landmark",
     category: "learning",
+    createdAt: new Date("2023-03-01T10:00:00Z"),
+    popularity: 88,
   },
   {
     id: "6",
@@ -71,6 +81,8 @@ export let usefulLinksData: UsefulLink[] = [
     description: "The official documentation for Next.js, a React framework for PWA.",
     iconName: "BookMarked",
     category: "web",
+    createdAt: new Date("2023-03-10T10:00:00Z"),
+    popularity: 92,
   },
   {
     id: "7",
@@ -80,6 +92,8 @@ export let usefulLinksData: UsefulLink[] = [
     description: "A utility-first CSS framework for rapid UI development.",
     iconName: "BookMarked",
     category: "web",
+    createdAt: new Date("2023-04-01T10:00:00Z"),
+    popularity: 91,
   },
   {
     id: "8",
@@ -88,6 +102,8 @@ export let usefulLinksData: UsefulLink[] = [
     description: "Beautifully designed components that you can copy and paste into your apps.",
     iconName: "BookMarked",
     category: "web",
+    createdAt: new Date("2023-04-15T10:00:00Z"),
+    popularity: 93,
   },
   {
     id: "9",
@@ -97,6 +113,8 @@ export let usefulLinksData: UsefulLink[] = [
     description: "The official GitHub repository for Genkit, a toolkit for building AI-powered applications.",
     iconName: "Github",
     category: "project_repository",
+    createdAt: new Date("2023-05-01T10:00:00Z"),
+    popularity: 89,
   },
   {
     id: "10",
@@ -106,6 +124,8 @@ export let usefulLinksData: UsefulLink[] = [
     description: "Comprehensive documentation for web standards and technologies.",
     iconName: "BookOpenCheck",
     category: "web",
+    createdAt: new Date("2023-05-10T10:00:00Z"),
+    popularity: 94,
   },
   {
     id: "11",
@@ -115,6 +135,8 @@ export let usefulLinksData: UsefulLink[] = [
     description: "The official website for React, a JavaScript library for building user interfaces.",
     iconName: "BookMarked",
     category: "web",
+    createdAt: new Date("2023-06-01T10:00:00Z"),
+    popularity: 87,
   },
   {
     id: "12",
@@ -124,6 +146,8 @@ export let usefulLinksData: UsefulLink[] = [
     description: "The GitHub repository for Visual Studio Code, a popular open-source code editor.",
     iconName: "Github",
     category: "project_repository",
+    createdAt: new Date("2023-06-15T10:00:00Z"),
+    popularity: 96,
   },
   {
     id: "13",
@@ -133,6 +157,8 @@ export let usefulLinksData: UsefulLink[] = [
     description: "Learn to code for free. Build projects. Earn certifications.",
     iconName: "Code",
     category: "learning",
+    createdAt: new Date("2023-07-01T10:00:00Z"),
+    popularity: 97,
   },
   {
     id: "14",
@@ -142,6 +168,8 @@ export let usefulLinksData: UsefulLink[] = [
     description: "Access 2000 free online courses from 140 leading institutions worldwide.",
     iconName: "School",
     category: "learning",
+    createdAt: new Date("2023-07-10T10:00:00Z"),
+    popularity: 86,
   },
   {
     id: "15",
@@ -151,6 +179,8 @@ export let usefulLinksData: UsefulLink[] = [
     description: "Build skills with courses, certificates, and degrees online from world-class universities and companies.",
     iconName: "Award",
     category: "learning",
+    createdAt: new Date("2023-08-01T10:00:00Z"),
+    popularity: 84,
   },
   {
     id: "16",
@@ -160,6 +190,8 @@ export let usefulLinksData: UsefulLink[] = [
     description: "A classic book on software development and engineering, offering practical advice.",
     iconName: "BookOpen",
     category: "book",
+    createdAt: new Date("2023-08-15T10:00:00Z"),
+    popularity: 78,
   },
   {
     id: "17",
@@ -169,6 +201,8 @@ export let usefulLinksData: UsefulLink[] = [
     description: "A comprehensive introduction to computer science and programming by Harvard University, available on YouTube.",
     iconName: "Video",
     category: "youtube",
+    createdAt: new Date("2023-09-01T10:00:00Z"),
+    popularity: 98,
   },
   {
     id: "18",
@@ -178,6 +212,8 @@ export let usefulLinksData: UsefulLink[] = [
     description: "A YouTube playlist that covers a wide range of computer science topics in an accessible way.",
     iconName: "ListVideo",
     category: "youtube",
+    createdAt: new Date("2023-09-10T10:00:00Z"),
+    popularity: 99,
   },
   {
     id: "19",
@@ -187,6 +223,8 @@ export let usefulLinksData: UsefulLink[] = [
     description: "An end-to-end open source platform for machine learning. It has a comprehensive, flexible ecosystem of tools, libraries and community resources.",
     iconName: "Github",
     category: "project_repository",
+    createdAt: new Date("2023-10-01T10:00:00Z"),
+    popularity: 83,
   },
   {
     id: "20",
@@ -196,6 +234,8 @@ export let usefulLinksData: UsefulLink[] = [
     description: "The official mirror of the Linux kernel source tree.",
     iconName: "Github",
     category: "project_repository",
+    createdAt: new Date("2023-10-15T10:00:00Z"),
+    popularity: 82,
   },
   {
     id: "21",
@@ -205,6 +245,8 @@ export let usefulLinksData: UsefulLink[] = [
     description: "Build cross-platform desktop apps with JavaScript, HTML, and CSS.",
     iconName: "Github",
     category: "project_repository",
+    createdAt: new Date("2023-11-01T10:00:00Z"),
+    popularity: 79,
   },
   {
     id: "22",
@@ -214,6 +256,8 @@ export let usefulLinksData: UsefulLink[] = [
     description: "Open source home automation that puts local control and privacy first.",
     iconName: "Github",
     category: "project_repository",
+    createdAt: new Date("2023-11-10T10:00:00Z"),
+    popularity: 77,
   },
   {
     id: "23",
@@ -223,6 +267,8 @@ export let usefulLinksData: UsefulLink[] = [
     description: "A feature-packed, cross-platform game engine to create 2D and 3D games from a unified interface.",
     iconName: "Github",
     category: "project_repository",
+    createdAt: new Date("2023-12-01T10:00:00Z"),
+    popularity: 76,
   },
   {
     id: "24",
@@ -232,6 +278,8 @@ export let usefulLinksData: UsefulLink[] = [
     description: "An online electronics simulator for designing and testing circuits.",
     iconName: "Cpu",
     category: "web",
+    createdAt: new Date("2023-12-15T10:00:00Z"),
+    popularity: 70,
   },
 ];
 
@@ -240,36 +288,40 @@ export function addSuggestedLinks(newLinks: SuggestedLink[]) {
   const existingUrls = new Set(usefulLinksData.map(link => link.url));
   let maxId = usefulLinksData.reduce((max, link) => Math.max(max, parseInt(link.id, 10)), 0);
 
+  const addedLinks: UsefulLink[] = [];
+
   newLinks.forEach(suggestedLink => {
     if (!existingUrls.has(suggestedLink.url)) {
       maxId++;
-      usefulLinksData.push({
+      const newLinkEntry: UsefulLink = {
         id: maxId.toString(),
         title: suggestedLink.title,
         author: suggestedLink.author,
         url: suggestedLink.url,
         description: suggestedLink.description,
-        // Map iconKeywords to a specific iconName if needed, or use a default
-        // For now, let's try to find a generic icon or use HelpCircle
         iconName: mapKeywordsToIcon(suggestedLink.iconKeywords) || "HelpCircle",
         category: suggestedLink.category,
-      });
+        createdAt: new Date(), // Set current date for new links
+        popularity: Math.floor(Math.random() * 50), // Assign a random low popularity for new links
+        isNew: true,
+      };
+      usefulLinksData.push(newLinkEntry);
+      addedLinks.push(newLinkEntry);
       existingUrls.add(suggestedLink.url);
     }
   });
+  return addedLinks; // Return the actual links that were added
 }
 
 // Helper function to map keywords to a specific Lucide icon name
-// This is a basic example and can be expanded
 function mapKeywordsToIcon(keywords?: string): string | undefined {
   if (!keywords) return undefined;
   const lowerKeywords = keywords.toLowerCase();
   if (lowerKeywords.includes("code") || lowerKeywords.includes("repository")) return "Github";
-  if (lowerKeywords.includes("video") || lowerKeywords.includes("playlist")) return "Youtube";
+  if (lowerKeywords.includes("video") || lowerKeywords.includes("playlist")) return "Youtube"; // Lucide does not have Youtube icon, ensure it's available or mapped.
   if (lowerKeywords.includes("book")) return "BookOpen";
   if (lowerKeywords.includes("learn") || lowerKeywords.includes("education")) return "School";
-  if (lowerKeywords.includes("tool") || lowerKeywords.includes("utility")) return "Tool";
-  if (lowerKeywords.includes("web") || lowerKeywords.includes("site")) return "Globe";
+  if (lowerKeywords.includes("tool") || lowerKeywords.includes("utility") || lowerKeywords.includes("web") || lowerKeywords.includes("site") ) return "Globe";
   if (lowerKeywords.includes("circuit") || lowerKeywords.includes("electronic")) return "Cpu";
   return "Link"; // Default icon
 }

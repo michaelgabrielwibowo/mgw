@@ -24,7 +24,10 @@ export interface UsefulLink {
   url: string;
   description?: string;
   iconName?: string; // Lucide icon name as string
-  category?: 'web' | 'repository' | 'learning' | 'book' | 'youtube';
+  category?: 'web' | 'project_repository' | 'learning' | 'book' | 'youtube';
+  createdAt: Date;
+  popularity: number; // A simple score, e.g., 0-100 or view count
+  isNew?: boolean; // Optional flag for recently added links
 }
 
 export interface CommentFeedback {
