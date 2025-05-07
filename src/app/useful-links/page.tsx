@@ -7,7 +7,7 @@ import { Section } from '@/components/app/Section';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useState, useMemo, useEffect } from 'react';
-import { usefulLinksData } from '@/data/site-data'; // Import from centralized data
+import { usefulLinksData, siteProfileData } from '@/data/site-data'; // Import from centralized data
 import type { UsefulLink } from '@/types'; // Ensure this type is correctly defined
 
 const iconMap: Record<string, LucideIcon> = {
@@ -78,7 +78,7 @@ export default function UsefulLinksPage() {
           </Button>
         </div>
         
-        <Section title="All Useful Links & Resources" className="w-full">
+        <Section title="View All" className="w-full">
           <div className="mb-8 p-6 bg-card rounded-xl shadow-lg">
             <div className="flex flex-col sm:flex-row gap-4 items-center">
               <div className="relative w-full sm:flex-grow">
@@ -156,3 +156,4 @@ export default function UsefulLinksPage() {
     </div>
   );
 }
+
