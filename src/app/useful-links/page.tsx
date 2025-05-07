@@ -26,12 +26,12 @@ const iconMap: Record<string, LucideIcon> = {
   Code,
   School,
   Award,
-  Video,        // For single YouTube videos (outline camera)
+  Video,        // For single YouTube videos (outline camera icon)
   ListVideo,    // Available for other list-like video content if needed
   BookOpen,
   Cpu,
   Globe,        // For websites
-  Youtube,      // For YouTube playlists (brand logo with "filled" play button)
+  Youtube,      // For YouTube playlists (brand logo with "filled" play button icon)
   Link: ExternalLink, 
   Sparkles, 
   TrendingUp, 
@@ -47,13 +47,18 @@ const filterOptions = [
   { value: 'web', label: 'Websites & Tools' },
   { value: 'project_repository', label: 'Project Repositories' },
   { value: 'book', label: 'Books' },
-  { value: 'youtube', label: 'YouTube Content' },
+  { value: 'youtube', label: 'YouTube Content' }, // Generic label for filter dropdown
 ];
 
 // Helper to get category label
-const getCategoryLabel = (value?: string) => {
-  const option = filterOptions.find(opt => opt.value === value);
-  return option ? option.label : (value ? value.charAt(0).toUpperCase() + value.slice(1) : "Link");
+const getCategoryLabel = (categoryValue?: string, iconNameValue?: string) => {
+  if (categoryValue === 'youtube') {
+    if (iconNameValue === 'Video') return 'YouTube Video';
+    if (iconNameValue === 'Youtube') return 'YouTube Playlist';
+    return 'YouTube Content'; // Fallback for general YouTube category
+  }
+  const option = filterOptions.find(opt => opt.value === categoryValue);
+  return option ? option.label : (categoryValue ? categoryValue.charAt(0).toUpperCase() + categoryValue.slice(1) : "Link");
 };
 
 
@@ -235,7 +240,9 @@ export default function UsefulLinksPage() {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {filteredLinks.map((link) => {
-                let IconComp = iconMap["Link"]; 
+                let IconComp: LucideIcon = iconMap["Link"]; // Default icon
+                
+                // Determine icon based on filter or link properties
                 if (selectedFilter === 'newly_added' && newlyAddedLinkIds.includes(link.id)) {
                   IconComp = iconMap["Sparkles"];
                 } else if (selectedFilter === 'newest') {
@@ -243,7 +250,7 @@ export default function UsefulLinksPage() {
                 } else if (selectedFilter === 'popular') {
                     IconComp = iconMap["TrendingUp"];
                 } else if (link.iconName && iconMap[link.iconName]) {
-                    // For YouTube links, map based on specific keyword from data
+                    // Specific icons for YouTube content based on iconName
                     if (link.iconName === 'Youtube') IconComp = Youtube; // Filled Brand Icon for playlists
                     else if (link.iconName === 'Video') IconComp = Video; // Outline Camera for single videos
                     else IconComp = iconMap[link.iconName];
@@ -258,7 +265,7 @@ export default function UsefulLinksPage() {
                           <CardTitle className="text-xl text-primary">{link.title}</CardTitle>
                           {link.author && <CardDescription>By {link.author}</CardDescription>}
                            <CardDescription className="text-xs mt-1">
-                              Category: <span className="font-semibold">{getCategoryLabel(link.category)}</span>
+                              Category: <span className="font-semibold">{getCategoryLabel(link.category, link.iconName)}</span>
                               {selectedFilter === 'newest' && <span className="ml-2 text-muted-foreground">({link.createdAt.toLocaleDateString()})</span>}
                               {selectedFilter === 'popular' && <span className="ml-2 text-muted-foreground">(Popularity: {link.popularity})</span>}
                            </CardDescription>
@@ -293,3 +300,4 @@ export default function UsefulLinksPage() {
     </div>
   );
 }
+
