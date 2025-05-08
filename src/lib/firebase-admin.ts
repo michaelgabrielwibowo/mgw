@@ -7,21 +7,38 @@ import { getAuth } from 'firebase-admin/auth';
 let firestoreInstance: admin.firestore.Firestore | undefined;
 let authInstance: admin.auth.Auth | undefined;
 
-// Ensure Firebase Admin is initialized only once
+// --- Firebase Admin SDK Initialization ---
+// This code attempts to initialize the Firebase Admin SDK.
+// Initialization relies on Application Default Credentials (ADC).
+// Common errors ("Could not refresh access token", "Getting metadata from plugin failed", status code 500/403)
+// usually indicate problems with ADC setup or IAM permissions.
+
 if (!getApps().length) {
   console.log("Attempting to initialize Firebase Admin SDK...");
   try {
     // Initialize using Application Default Credentials (ADC).
-    // This works automatically in managed environments like App Hosting and Cloud Run.
-    // For local development (Cloud Workstations, local machine):
-    // 1. Ensure Google Cloud SDK (`gcloud`) is installed.
-    // 2. Authenticate: Run `gcloud auth application-default login` in your terminal.
-    // 3. Set Project: Run `gcloud config set project YOUR_PROJECT_ID`. Replace YOUR_PROJECT_ID.
-    // 4. Permissions: Ensure the ADC principal (user/service account) has necessary Firestore permissions (e.g., Cloud Datastore User role).
+    // This works automatically in managed environments like App Hosting and Cloud Run
+    // IF the underlying service account has the necessary IAM permissions.
+
+    // **FOR LOCAL DEVELOPMENT (Cloud Workstations, local machine):**
+    // 1. **Install Google Cloud SDK (`gcloud`)**: If not already installed.
+    // 2. **Authenticate ADC**: Run `gcloud auth application-default login` in your terminal.
+    //    - Make sure you log in with a Google account that has permissions in YOUR_PROJECT_ID.
+    // 3. **Set Project**: Run `gcloud config set project YOUR_PROJECT_ID`. Replace YOUR_PROJECT_ID with your actual GCP Project ID.
+    // 4. **Check IAM Permissions**: The Google account used in step 2 needs Firestore permissions
+    //    in YOUR_PROJECT_ID. The 'Cloud Datastore User' or 'Firebase Admin SDK Administrator' roles are common.
+    //    Check IAM settings in the Google Cloud Console.
+
+    // **FOR MANAGED ENVIRONMENTS (App Hosting, Cloud Run):**
+    // - The environment uses a **service account** to interact with Google Cloud services.
+    // - **Check Service Account Permissions**: Go to the Google Cloud Console, find the service account
+    //   used by your App Hosting/Cloud Run service, and ensure it has the necessary Firestore permissions
+    //   (e.g., 'Cloud Datastore User' role) in YOUR_PROJECT_ID.
+
     initializeApp();
     console.log('Firebase Admin SDK initialized successfully using Application Default Credentials.');
 
-    // Try accessing services immediately after initialization
+    // Try accessing services immediately after initialization to catch permission errors early.
     try {
       firestoreInstance = getFirestore();
       authInstance = getAuth();
@@ -31,12 +48,12 @@ if (!getApps().length) {
       console.error("Firebase Admin SDK initialized, BUT failed to access services (Firestore/Auth):");
       console.error("Service Access Error Code:", serviceError.code);
       console.error("Service Access Error Message:", serviceError.message);
-      console.error("This often indicates permission issues with the authenticated account.");
+      console.error("** LIKELY CAUSE: Insufficient IAM permissions for the authenticated account/service account.**");
       console.error("Please verify the roles/permissions in GCP IAM for the principal used by ADC.");
       console.error("Required roles often include 'Cloud Datastore User' or similar for Firestore access.");
+      console.error("See setup steps above for local dev / managed environments.");
       console.error("-----------------------------------------------------");
-      // Decide if you want to throw or let instances be undefined
-      // throw new Error('Failed to access Firebase services post-initialization.');
+      // Keep instances undefined so checks elsewhere fail gracefully.
     }
 
   } catch (error: any) {
@@ -46,26 +63,22 @@ if (!getApps().length) {
     console.error("Initialization Error Message:", error.message);
     console.error("-----------------------------------------------------");
     console.error('COMMON CAUSES & SOLUTIONS:');
-    console.error('1. Application Default Credentials (ADC) not configured:');
-    console.error('   - Run `gcloud auth application-default login` in your terminal.');
-    console.error('   - Ensure you are logged in with the correct Google account.');
-    console.error('2. Incorrect GCP Project Set:');
-    console.error('   - Run `gcloud config set project YOUR_PROJECT_ID` (Replace YOUR_PROJECT_ID).');
-    console.error('3. Insufficient Permissions:');
-    console.error('   - The account used for ADC needs Firestore permissions (e.g., "Cloud Datastore User" role in GCP IAM).');
-    console.error('   - If running in a service environment (Cloud Run, etc.), check the service account permissions.');
-    console.error('4. Network Issues:');
-    console.error('   - Ensure the environment can reach Google Cloud APIs (googleapis.com).');
-    if (error.message?.includes('Could not refresh access token')) {
-         console.error('SPECIFIC HINT: "Could not refresh access token" strongly suggests an ADC setup or permission problem. Double-check steps 1-3.');
+    console.error('1. Application Default Credentials (ADC) not configured correctly:');
+    console.error('   - Local Dev: Run `gcloud auth application-default login` and `gcloud config set project YOUR_PROJECT_ID`.');
+    console.error('   - Managed Env: Check the service account\'s existence and activation.');
+    console.error('2. Insufficient IAM Permissions:');
+    console.error('   - The account/service account used for ADC needs Firestore permissions (e.g., "Cloud Datastore User" role in GCP IAM for YOUR_PROJECT_ID).');
+    console.error('3. Network Issues:');
+    console.error('   - Ensure the environment can reach Google Cloud APIs (googleapis.com). Check firewall rules.');
+    if (error.message?.includes('Could not refresh access token') || error.message?.includes('Getting metadata from plugin failed')) {
+         console.error('SPECIFIC HINT: These errors strongly suggest an ADC setup or permission problem. Double-check steps 1 & 2.');
     }
     console.error("-----------------------------------------------------");
-    // Optional: re-throw the error if initialization is critical for the app to start
-    // throw new Error('Critical Firebase Admin SDK initialization failed.');
+    // Let the application continue, but Firestore/Auth will be unusable.
   }
 } else {
     console.log("Firebase Admin SDK already initialized. Accessing existing services.");
-    // Access services from the existing app if not done already
+    // Access services from the existing app if not done already during initial setup
     if (!firestoreInstance) {
        try {
            firestoreInstance = getFirestore();
@@ -83,7 +96,8 @@ if (!getApps().length) {
 }
 
 // Export the potentially initialized services.
-const firestore = firestoreInstance; // Export potentially undefined instance
-const auth = authInstance; // Export potentially undefined instance
+// Code using these exports should check if they are defined before using them.
+const firestore = firestoreInstance;
+const auth = authInstance;
 
 export { admin, firestore, auth };

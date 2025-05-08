@@ -28,7 +28,7 @@ let usefulLinksCollection: FirebaseFirestore.CollectionReference | null = null;
 if (firestore) { // Check if firestore instance was successfully initialized
     usefulLinksCollection = firestore.collection('usefulLinks');
 } else {
-    console.error("Firestore instance is not available. Useful links functionality will be disabled.");
+    console.error("Firestore instance is not available (initialization failed or permissions issue). Useful links functionality will be disabled. Check 'src/lib/firebase-admin.ts' logs.");
 }
 
 
@@ -56,8 +56,8 @@ export async function getUsefulLinks(): Promise<UsefulLink[]> {
     // Log essential error details concisely
     console.error(`Error fetching useful links: Code=${error.code}, Message=${error.message}`);
     if (error.message?.includes('Getting metadata from plugin failed') || error.message?.includes('Could not refresh access token')) {
-        console.warn("Firebase ADC Hint: This often indicates an issue with Firebase Admin SDK authentication or permissions.");
-        console.warn("Check the Firebase Admin initialization logs and ensure Application Default Credentials (ADC) are configured correctly (run `gcloud auth application-default login`, `gcloud config set project YOUR_PROJECT_ID`, and check IAM permissions).");
+        console.warn("Firebase ADC/Permissions Hint: This often indicates an issue with Firebase Admin SDK authentication or IAM permissions.");
+        console.warn("Check the detailed logs in 'src/lib/firebase-admin.ts' during startup and follow the suggested steps regarding `gcloud` and IAM roles.");
     }
     // console.error("Full error stack:", error.stack); // Optionally log stack for deeper debugging
     return []; // Return empty array on error
@@ -93,7 +93,7 @@ export async function addSuggestedLinks(newLinks: SuggestedLink[]): Promise<Usef
         });
         console.log(`Found ${existingUrls.size} existing URLs.`);
     } catch (error: any) {
-        console.error(`Error fetching existing URLs: ${error.message}. Check Firestore permissions/ADC setup.`);
+        console.error(`Error fetching existing URLs: ${error.message}. Check Firestore permissions/ADC setup (see firebase-admin.ts logs).`);
         return []; // Fail safely
     }
 
@@ -135,7 +135,7 @@ export async function addSuggestedLinks(newLinks: SuggestedLink[]): Promise<Usef
             // Optionally reset the 'isNew' flag for older links here if needed
             // await resetIsNewFlag(); // Make sure this function exists and is imported if uncommented
         } catch (error: any) {
-            console.error(`Error committing batch add to Firestore: ${error.message}. Check Firestore permissions/ADC setup.`);
+            console.error(`Error committing batch add to Firestore: ${error.message}. Check Firestore permissions/ADC setup (see firebase-admin.ts logs).`);
             return []; // Return empty array on commit error
         }
     } else {
@@ -194,7 +194,7 @@ export async function resetIsNewFlag() {
     await batch.commit();
     console.log(`Reset 'isNew' flag for ${snapshot.size} links.`);
   } catch (error: any) {
-    console.error(`Error resetting 'isNew' flag: ${error.message}. Check Firestore permissions/ADC setup.`);
+    console.error(`Error resetting 'isNew' flag: ${error.message}. Check Firestore permissions/ADC setup (see firebase-admin.ts logs).`);
   }
 }
 
@@ -353,7 +353,7 @@ export async function resetIsNewFlag() {
 //           author: "Harvard University",
 //           url: "https://www.youtube.com/playlist?list=PLhQjrBD2T382_R182iC2gNZI9HzjMjhd0", // Example Playlist URL
 //           description: "A comprehensive introduction to computer science and programming by Harvard University, available on YouTube.",
-//           iconName: "Video", // Changed to Video icon
+//           iconName: "Youtube", // Use Youtube icon for playlist
 //           category: "youtube",
 //           popularity: 90,
 //       },
@@ -362,7 +362,7 @@ export async function resetIsNewFlag() {
 //           author: "CrashCourse",
 //           url: "https://www.youtube.com/playlist?list=PL8dPuuaLjXtNlUrzyH5r6jN9ulIgZBpdo", // Example Playlist URL
 //           description: "A YouTube playlist that covers a wide range of computer science topics in an accessible way.",
-//           iconName: "Youtube", // Changed to Youtube icon
+//           iconName: "Youtube", // Use Youtube icon for playlist
 //           category: "youtube",
 //           popularity: 85,
 //       },
