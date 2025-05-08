@@ -1,4 +1,3 @@
-
 "use client";
 import Link from 'next/link';
 import { ArrowLeft, ExternalLink, BookMarked, Lightbulb, BookOpenCheck, Users, FileText, Landmark, HelpCircle, Search, Github, Code, School, Award, Video, ListVideo, BookOpen, Cpu, Globe, type LucideIcon, Sparkles, TrendingUp, Eye, Youtube, Download, Loader2, Sheet, FileSpreadsheet, FileTextIcon } from 'lucide-react'; // Added Download, Loader2, Sheet, FileSpreadsheet, FileTextIcon
@@ -304,15 +303,6 @@ export default function UsefulLinksPage() {
                     <FileSpreadsheet className="mr-2 h-4 w-4"/> Export as CSV
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => handleExport('google-sheets')} disabled>
-                     <Sheet className="mr-2 h-4 w-4" /> Export to Google Sheets
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => handleExport('google-docs')} disabled>
-                     <FileText className="mr-2 h-4 w-4" /> Export to Google Docs
-                  </DropdownMenuItem>
-                   {/* Add placeholders for other formats if desired
-                   <DropdownMenuItem disabled>Export as PDF</DropdownMenuItem>
-                   <DropdownMenuItem disabled>Export as DOCX</DropdownMenuItem> */}
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
@@ -418,3 +408,4 @@ export default function UsefulLinksPage() {
      </TooltipProvider>
   );
 }
+
