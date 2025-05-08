@@ -36,33 +36,19 @@ export async function getUsefulLinks(): Promise<UsefulLink[]> {
     console.log(`Firestore snapshot received. Empty: ${snapshot.empty}. Size: ${snapshot.size}`);
     if (snapshot.empty) {
       console.log('No useful links found in Firestore.');
-      // Optionally seed initial data if collection is empty
-      // await seedInitialLinks(); // Make sure this function exists and is imported if uncommented
-      // const seededSnapshot = await usefulLinksCollection.orderBy('createdAt', 'desc').get();
-      // return seededSnapshot.docs.map(doc => mapDocToUsefulLink(doc));
       return [];
     }
     const links = snapshot.docs.map(doc => mapDocToUsefulLink(doc));
     console.log(`Successfully fetched and mapped ${links.length} links.`);
     return links;
   } catch (error: any) {
-    // Log more detailed error information
-    console.error("-----------------------------------------------------");
-    console.error("Error fetching useful links from Firestore:");
-    console.error("Error Code:", error.code);
-    console.error("Error Message:", error.message);
-    // The "Getting metadata from plugin failed" error often relates to authentication/permissions.
+    // Log essential error details concisely
+    console.error(`Error fetching useful links: Code=${error.code}, Message=${error.message}`);
     if (error.message?.includes('Getting metadata from plugin failed')) {
-        console.error("Hint: This often indicates an issue with Firebase Admin SDK authentication.");
-        console.error("Ensure Application Default Credentials (ADC) are configured correctly:");
-        console.error("  1. Run `gcloud auth application-default login` in your terminal.");
-        console.error("  2. Run `gcloud config set project YOUR_PROJECT_ID` (replace YOUR_PROJECT_ID).");
-        console.error("  3. Verify the authenticated user/service account has Firestore permissions (e.g., Cloud Datastore User role).");
+        console.warn("Firebase ADC Hint: This often indicates an issue with Firebase Admin SDK authentication.");
+        console.warn("Ensure Application Default Credentials (ADC) are configured correctly (run `gcloud auth application-default login` and check Firestore permissions).");
     }
-    console.error("Error Details:", error.details); // Might contain more specifics
-    console.error("Error Stack:", error.stack);
-    console.error("-----------------------------------------------------");
-
+    // console.error("Full error stack:", error.stack); // Optionally log stack for deeper debugging
     return []; // Return empty array on error
   }
 }
@@ -91,8 +77,7 @@ export async function addSuggestedLinks(newLinks: SuggestedLink[]): Promise<Usef
         });
         console.log(`Found ${existingUrls.size} existing URLs.`);
     } catch (error: any) {
-        console.error("Error fetching existing URLs:", error.message, error.stack);
-        // Decide if we should proceed or return an error
+        console.error(`Error fetching existing URLs: ${error.message}`);
         return []; // Fail safely
     }
 
@@ -134,7 +119,7 @@ export async function addSuggestedLinks(newLinks: SuggestedLink[]): Promise<Usef
             // Optionally reset the 'isNew' flag for older links here if needed
             // await resetIsNewFlag(); // Make sure this function exists and is imported if uncommented
         } catch (error: any) {
-            console.error("Error committing batch add to Firestore:", error.message, error.stack);
+            console.error(`Error committing batch add to Firestore: ${error.message}`);
             return []; // Return empty array on commit error
         }
     } else {
@@ -189,7 +174,7 @@ export async function resetIsNewFlag() {
     await batch.commit();
     console.log(`Reset 'isNew' flag for ${snapshot.size} links.`);
   } catch (error: any) {
-    console.error("Error resetting 'isNew' flag:", error.message, error.stack);
+    console.error(`Error resetting 'isNew' flag: ${error.message}`);
   }
 }
 
@@ -214,42 +199,6 @@ export async function resetIsNewFlag() {
 //         category: "learning",
 //         popularity: 90,
 //       },
-//       {
-//         title: "Khan Academy",
-//         author: "Khan Academy",
-//         url: "https://www.khanacademy.org/",
-//         description: "Offers practice exercises, instructional videos, and a personalized learning dashboard.",
-//         iconName: "Users",
-//         category: "learning",
-//         popularity: 95,
-//       },
-//       {
-//         title: "Project Gutenberg",
-//         author: "Various Volunteers",
-//         url: "https://www.gutenberg.org/",
-//         description: "A library of over 70,000 free eBooks, with a focus on older works for which U.S. copyright has expired.",
-//         iconName: "BookOpen",
-//         category: "book",
-//         popularity: 80,
-//       },
-//       {
-//         title: "MIT OpenCourseWare",
-//         author: "MIT",
-//         url: "https://ocw.mit.edu/",
-//         description: "A web-based publication of virtually all MIT course content, open and available to the world.",
-//         iconName: "Landmark",
-//         category: "learning",
-//         popularity: 88,
-//       },
-//       {
-//         title: "Next.js Documentation",
-//         author: "Vercel",
-//         url: "https://nextjs.org/docs",
-//         description: "The official documentation for Next.js, a React framework for PWA.",
-//         iconName: "BookMarked",
-//         category: "web",
-//         popularity: 92,
-//       },
 //       // ... add other initial links ...
 //   ];
 //   const batch = firestore.batch();
@@ -269,4 +218,3 @@ export async function resetIsNewFlag() {
 //     console.error("Error seeding initial links:", error);
 //   }
 // }
-
