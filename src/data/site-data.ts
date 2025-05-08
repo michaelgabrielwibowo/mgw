@@ -1,12 +1,11 @@
 
 import type { SiteProfile, PersonalContact, UsefulLink } from '@/types';
 import type { SuggestedLink } from '@/ai/flows/suggest-useful-links-flow';
-import { firestore } from '@/lib/firebase-admin'; // Import initialized Firestore instance
+import { firestore } from '@/lib/firebase-admin'; // Import potentially initialized Firestore instance
 import { Timestamp } from 'firebase-admin/firestore';
 import { mapKeywordsToIcon } from '@/lib/icon-mapper'; // Move helper to lib
 
 // --- Static Data ---
-// Keep static data that might be managed differently (e.g., admin panel later)
 export const siteProfileData: SiteProfile = {
   siteTitle: 'PersonaLink | Michael Gabriel Wibowo | Personal Page',
   metaDescriptionName: 'Michael Gabriel Wibowo',
@@ -23,13 +22,24 @@ export const personalContactsData: PersonalContact[] = [
 ];
 
 // --- Firestore Interaction for Useful Links ---
-const usefulLinksCollection = firestore.collection('usefulLinks');
+
+let usefulLinksCollection: FirebaseFirestore.CollectionReference | null = null;
+if (firestore) { // Check if firestore instance was successfully initialized
+    usefulLinksCollection = firestore.collection('usefulLinks');
+} else {
+    console.error("Firestore instance is not available. Useful links functionality will be disabled.");
+}
+
 
 /**
  * Fetches all useful links from Firestore.
  * @returns Promise<UsefulLink[]> Array of useful links.
  */
 export async function getUsefulLinks(): Promise<UsefulLink[]> {
+  if (!usefulLinksCollection) {
+    console.warn("Attempted to fetch useful links, but Firestore is not available.");
+    return [];
+  }
   console.log("Attempting to fetch useful links from Firestore...");
   try {
     const snapshot = await usefulLinksCollection.orderBy('createdAt', 'desc').get();
@@ -44,9 +54,9 @@ export async function getUsefulLinks(): Promise<UsefulLink[]> {
   } catch (error: any) {
     // Log essential error details concisely
     console.error(`Error fetching useful links: Code=${error.code}, Message=${error.message}`);
-    if (error.message?.includes('Getting metadata from plugin failed')) {
-        console.warn("Firebase ADC Hint: This often indicates an issue with Firebase Admin SDK authentication.");
-        console.warn("Ensure Application Default Credentials (ADC) are configured correctly (run `gcloud auth application-default login` and check Firestore permissions).");
+    if (error.message?.includes('Getting metadata from plugin failed') || error.message?.includes('Could not refresh access token')) {
+        console.warn("Firebase ADC Hint: This often indicates an issue with Firebase Admin SDK authentication or permissions.");
+        console.warn("Check the Firebase Admin initialization logs and ensure Application Default Credentials (ADC) are configured correctly (run `gcloud auth application-default login`, `gcloud config set project YOUR_PROJECT_ID`, and check IAM permissions).");
     }
     // console.error("Full error stack:", error.stack); // Optionally log stack for deeper debugging
     return []; // Return empty array on error
@@ -60,6 +70,11 @@ export async function getUsefulLinks(): Promise<UsefulLink[]> {
  * @returns Promise<UsefulLink[]> Array of links that were actually added (with JS Date).
  */
 export async function addSuggestedLinks(newLinks: SuggestedLink[]): Promise<UsefulLink[]> {
+    if (!usefulLinksCollection || !firestore) { // Added check for firestore for batch
+      console.warn("Attempted to add suggested links, but Firestore is not available.");
+      return [];
+    }
+
     const addedLinks: UsefulLink[] = [];
     const batch = firestore.batch();
     let newDocsCount = 0;
@@ -77,7 +92,7 @@ export async function addSuggestedLinks(newLinks: SuggestedLink[]): Promise<Usef
         });
         console.log(`Found ${existingUrls.size} existing URLs.`);
     } catch (error: any) {
-        console.error(`Error fetching existing URLs: ${error.message}`);
+        console.error(`Error fetching existing URLs: ${error.message}. Check Firestore permissions/ADC setup.`);
         return []; // Fail safely
     }
 
@@ -119,7 +134,7 @@ export async function addSuggestedLinks(newLinks: SuggestedLink[]): Promise<Usef
             // Optionally reset the 'isNew' flag for older links here if needed
             // await resetIsNewFlag(); // Make sure this function exists and is imported if uncommented
         } catch (error: any) {
-            console.error(`Error committing batch add to Firestore: ${error.message}`);
+            console.error(`Error committing batch add to Firestore: ${error.message}. Check Firestore permissions/ADC setup.`);
             return []; // Return empty array on commit error
         }
     } else {
@@ -159,6 +174,10 @@ function mapDocToUsefulLink(doc: FirebaseFirestore.QueryDocumentSnapshot | Fireb
 
 // Example function to reset the 'isNew' flag for all links (could be run periodically)
 export async function resetIsNewFlag() {
+  if (!usefulLinksCollection || !firestore) {
+      console.warn("Attempted to reset 'isNew' flag, but Firestore is not available.");
+      return;
+  }
   console.log("Attempting to reset 'isNew' flag for older links...");
   try {
     const snapshot = await usefulLinksCollection.where('isNew', '==', true).get();
@@ -174,7 +193,7 @@ export async function resetIsNewFlag() {
     await batch.commit();
     console.log(`Reset 'isNew' flag for ${snapshot.size} links.`);
   } catch (error: any) {
-    console.error(`Error resetting 'isNew' flag: ${error.message}`);
+    console.error(`Error resetting 'isNew' flag: ${error.message}. Check Firestore permissions/ADC setup.`);
   }
 }
 
@@ -218,3 +237,5 @@ export async function resetIsNewFlag() {
 //     console.error("Error seeding initial links:", error);
 //   }
 // }
+
+    
