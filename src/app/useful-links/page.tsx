@@ -1,7 +1,7 @@
 
 "use client";
 import Link from 'next/link';
-import { ArrowLeft, ExternalLink, BookMarked, Lightbulb, BookOpenCheck, Users, FileText, Landmark, HelpCircle, Search, Github, Code, School, Award, Video, ListVideo, BookOpen, Cpu, Globe, type LucideIcon, Sparkles, TrendingUp, Eye, Youtube, Download, Loader2, Sheet, FileSpreadsheet, FileTextIcon } from 'lucide-react'; // Added Download, Loader2, Sheet, FileSpreadsheet, FileTextIcon
+import { ArrowLeft, ExternalLink, BookMarked, Lightbulb, BookOpenCheck, Users, FileText, Landmark, HelpCircle, Search, Github, Code, School, Award, Video, ListVideo, BookOpen, Cpu, Globe, Link as LinkIcon, Sparkles, TrendingUp, Eye, Youtube, Download, Loader2, Sheet, FileSpreadsheet, FileTextIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Section } from '@/components/app/Section';
@@ -15,13 +15,14 @@ import {
   DropdownMenuSeparator
 } from "@/components/ui/dropdown-menu";
 import { useState, useMemo, useEffect } from 'react';
-// Import the mutable data source directly to reflect changes
-import { usefulLinksData, siteProfileData, addSuggestedLinks as addNewLinksToDataStore } from '@/data/site-data';
+// Import functions to interact with Firestore data
+import { getUsefulLinks, addSuggestedLinks, siteProfileData } from '@/data/site-data';
 import type { UsefulLink } from '@/types';
 import { suggestUsefulLinks, type SuggestUsefulLinksInput, type SuggestedLink } from '@/ai/flows/suggest-useful-links-flow';
 import { useToast } from '@/hooks/use-toast';
 import { ThemeToggle } from '@/components/app/ThemeToggle';
-import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'; // Import Tooltip components
+import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
+import { getCategoryLabel } from '@/lib/utils'; // Assuming getCategoryLabel is moved to utils
 
 
 const iconMap: Record<string, LucideIcon> = {
@@ -42,7 +43,7 @@ const iconMap: Record<string, LucideIcon> = {
   Cpu,
   Globe,        // For websites
   Youtube,      // For YouTube playlists (brand logo with "filled" play button icon)
-  Link: ExternalLink,
+  Link: LinkIcon, // Map 'Link' string to the imported LinkIcon
   Sparkles,
   TrendingUp,
   Eye,
@@ -54,35 +55,45 @@ const filterOptions = [
   { value: 'popular', label: 'Most Popular' },
   { value: 'newly_added', label: 'Recently Suggested'},
   { value: 'learning', label: 'Learning & Education' },
-  { value: 'website', label: 'Websites & Tools' }, // Renamed from 'web'
+  { value: 'website', label: 'Websites & Tools' },
   { value: 'project_repository', label: 'Project Repositories' },
   { value: 'book', label: 'Books' },
   { value: 'youtube', label: 'YouTube Content' },
 ];
-
-// Helper to get category label
-const getCategoryLabel = (categoryValue?: string, iconNameValue?: string) => {
-  if (categoryValue === 'youtube') {
-    if (iconNameValue === 'Video') return 'YouTube Video';
-    if (iconNameValue === 'Youtube') return 'YouTube Playlist';
-    return 'YouTube Content'; // Fallback for general YouTube category
-  }
-   // Corrected category value check
-  if (categoryValue === 'website') return 'Websites & Tools';
-
-  const option = filterOptions.find(opt => opt.value === categoryValue);
-  return option ? option.label : (categoryValue ? categoryValue.charAt(0).toUpperCase() + categoryValue.slice(1) : "Link");
-};
 
 
 export default function UsefulLinksPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedFilter, setSelectedFilter] = useState('all');
   const [currentTime, setCurrentTime] = useState<string | null>(null);
-  // Initialize state from the potentially mutated data source
-  const [links, setLinks] = useState<UsefulLink[]>(() => usefulLinksData.map(link => ({...link, createdAt: new Date(link.createdAt) })));
-  const [isLoadingNewLinks, setIsLoadingNewLinks] = useState(false);
+  // State to hold links fetched from Firestore
+  const [links, setLinks] = useState<UsefulLink[]>([]);
+  const [isFetchingLinks, setIsFetchingLinks] = useState(true); // Loading state for initial fetch
+  const [isLoadingNewLinks, setIsLoadingNewLinks] = useState(false); // Loading state for suggesting new links
   const { toast } = useToast();
+
+
+  // Fetch initial links from Firestore on component mount
+  useEffect(() => {
+    async function fetchLinks() {
+        setIsFetchingLinks(true);
+        try {
+            const fetchedLinks = await getUsefulLinks();
+            setLinks(fetchedLinks);
+        } catch (error) {
+            console.error("Failed to fetch useful links:", error);
+            toast({
+                title: "Error Loading Links",
+                description: "Could not fetch links from the database. Please try again later.",
+                variant: "destructive",
+            });
+            setLinks([]); // Set to empty array on error
+        } finally {
+            setIsFetchingLinks(false);
+        }
+    }
+    fetchLinks();
+  }, [toast]); // Add toast to dependency array
 
 
   useEffect(() => {
@@ -142,19 +153,20 @@ export default function UsefulLinksPage() {
 
 
       if (result && result.suggestedLinks) {
-        // Add new links to the persistent (module-level) data store
-        const addedLinks = addNewLinksToDataStore(result.suggestedLinks as SuggestedLink[]);
-         console.log("Added links to data store:", addedLinks);
-
+         // Call the server action/function to add links to Firestore
+        const addedLinks = await addSuggestedLinks(result.suggestedLinks as SuggestedLink[]);
+        console.log("Added links to data store:", addedLinks);
 
         if (addedLinks.length > 0) {
-          // Refresh local state from the updated persistent data store
-          const updatedLinksList = usefulLinksData.map(link => ({
-            ...link,
-            createdAt: new Date(link.createdAt) // Ensure createdAt is a Date object
-          }));
-          setLinks(updatedLinksList); // Update local state to reflect the newly added links
-          console.log("Updated local links state:", updatedLinksList);
+           // Update local state by adding the newly added links
+           // Ensure createdAt is a Date object if it's not already
+           const newLinksWithDate = addedLinks.map(link => ({
+               ...link,
+               createdAt: link.createdAt instanceof Date ? link.createdAt : new Date(link.createdAt),
+           }));
+           setLinks(prevLinks => [...newLinksWithDate, ...prevLinks]);
+           console.log("Updated local links state with new additions.");
+
 
           toast({
             title: "New Links Suggested!",
@@ -181,8 +193,8 @@ export default function UsefulLinksPage() {
         throw new Error("AI did not return suggested links in the expected format.");
       }
     } catch (error) {
-      console.error("Failed to suggest new links (fetch or server action error):", error);
-       let description = "Could not fetch new link suggestions. Please try again later.";
+      console.error("Failed to suggest or add new links:", error);
+       let description = "Could not fetch or save new link suggestions. Please try again later.";
        if (error instanceof Error) {
            description = error.message || description;
        }
@@ -202,7 +214,7 @@ export default function UsefulLinksPage() {
 
   const hasNewlyAddedLinks = useMemo(() => links.some(link => link.isNew === true), [links]);
 
-  const handleExport = (format: 'txt' | 'csv' ) => { // Removed Google options and other formats for simplicity
+  const handleExport = (format: 'txt' | 'csv' ) => {
     if (filteredLinks.length === 0) {
       toast({
         title: "No links to export",
@@ -232,7 +244,7 @@ export default function UsefulLinksPage() {
         if (value === undefined || value === null) return "";
         let str = value instanceof Date ? value.toISOString() : String(value);
         // Ensure strings containing comma, double quote, or newline are enclosed in double quotes
-        if (/[",\\n]/.test(str)) {
+        if (/[",\n]/.test(str)) { // Corrected regex to include newline
              // Escape existing double quotes by doubling them
              str = '"' + str.replace(/"/g, '""') + '"';
         }
@@ -284,11 +296,11 @@ export default function UsefulLinksPage() {
   };
 
 
-  if (currentTime === null) {
+  if (currentTime === null || isFetchingLinks) { // Show loader while fetching initial links too
     return (
       <div className="flex flex-col min-h-screen items-center justify-center">
         <Loader2 className="h-12 w-12 animate-spin text-primary" />
-        <p className="mt-4 text-muted-foreground">Loading page...</p>
+        <p className="mt-4 text-muted-foreground">Loading links...</p>
       </div>
     );
   }
@@ -326,7 +338,13 @@ export default function UsefulLinksPage() {
                   <DropdownMenuItem onClick={() => handleExport('csv')}>
                     <FileSpreadsheet className="mr-2 h-4 w-4"/> Export as CSV
                   </DropdownMenuItem>
-                  {/* Removed other export options */}
+                  {/* <DropdownMenuSeparator />
+                   <DropdownMenuItem onClick={() => handleExport('google_sheets')} disabled>
+                     <Sheet className="mr-2 h-4 w-4" /> Export to Google Sheets (Soon)
+                   </DropdownMenuItem>
+                   <DropdownMenuItem onClick={() => handleExport('google_docs')} disabled>
+                    <FileText className="mr-2 h-4 w-4" /> Export to Google Docs (Soon)
+                  </DropdownMenuItem> */}
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
@@ -363,44 +381,23 @@ export default function UsefulLinksPage() {
             </div>
 
             {filteredLinks.length === 0 ? (
-              <p className="text-muted-foreground text-center py-10">No links match your criteria. Try adjusting your search or filters.</p>
+              <p className="text-muted-foreground text-center py-10">No links match your criteria. Try adjusting your search or filters, or suggesting new links!</p>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {filteredLinks.map((link) => {
-                  let IconComp: LucideIcon = iconMap["Link"]; // Default icon
-
-                  // Determine icon based on various factors
-                  if (link.isNew && selectedFilter === 'newly_added') {
-                    IconComp = iconMap["Sparkles"]; // Highlight newly added if filter is active
-                  } else if (link.iconName && iconMap[link.iconName]) {
-                     // Specific icons for YouTube based on stored iconName hint
-                     if (link.iconName === 'Youtube') IconComp = Youtube; // Brand logo for playlists
-                     else if (link.iconName === 'Video') IconComp = Video; // Camera outline for single videos
-                     else IconComp = iconMap[link.iconName]; // Use mapped icon
-                  } else {
-                     // Fallback logic if iconName is missing or not in map
-                     switch(link.category) {
-                         case 'project_repository': IconComp = Github; break;
-                         case 'website': IconComp = Globe; break;
-                         case 'book': IconComp = BookOpen; break;
-                         case 'learning': IconComp = School; break;
-                         case 'youtube': IconComp = Youtube; break; // Default to playlist icon for general YouTube
-                         default: IconComp = ExternalLink; // General external link icon
-                     }
-                  }
-
+                   let IconComp: LucideIcon = iconMap[link.iconName || 'HelpCircle'] || HelpCircle; // Use mapped icon or fallback
 
                   return (
                     <Card key={link.id} className={`flex flex-col bg-card hover:shadow-xl transition-shadow duration-300 ease-in-out ${link.isNew ? 'border-2 border-primary/50' : ''}`}>
                       <CardHeader>
                         <div className="flex items-start gap-3">
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                                <IconComp className="w-6 h-6 mt-1 text-accent flex-shrink-0" />
-                            </TooltipTrigger>
-                            <TooltipContent>
-                                <p>{getCategoryLabel(link.category, link.iconName)}</p>
-                            </TooltipContent>
+                           <Tooltip>
+                              <TooltipTrigger asChild>
+                                 <IconComp className="w-6 h-6 mt-1 text-accent flex-shrink-0" />
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                 <p>{getCategoryLabel(link.category, link.iconName)}</p>
+                              </TooltipContent>
                            </Tooltip>
                           <div className="flex-grow">
                             <CardTitle className="text-xl text-primary">{link.title}</CardTitle>
@@ -422,9 +419,10 @@ export default function UsefulLinksPage() {
                       </CardContent>
                       <CardFooter className="pl-[calc(1.5rem+0.75rem+theme(spacing.3))] pr-6 pb-6">
                         <Button asChild variant="outline" className="w-full border-accent text-accent hover:bg-accent hover:text-accent-foreground">
-                          <Link href={link.url} target="_blank" rel="noopener noreferrer">
-                            Visit Link <ExternalLink className="ml-2 h-4 w-4" />
-                          </Link>
+                           {/* Use standard anchor for external link */}
+                           <a href={link.url} target="_blank" rel="noopener noreferrer">
+                             Visit Link <ExternalLink className="ml-2 h-4 w-4" />
+                           </a>
                         </Button>
                       </CardFooter>
                     </Card>

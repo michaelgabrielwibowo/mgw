@@ -4,10 +4,13 @@ import { UsefulLinks } from "@/components/app/UsefulLinks";
 import { FeedbackForm } from "@/components/app/FeedbackForm";
 import { Section } from "@/components/app/Section";
 import { Separator } from "@/components/ui/separator";
-import { siteProfileData, personalContactsData, usefulLinksData } from "@/data/site-data";
-import { ThemeToggle } from "@/components/app/ThemeToggle"; // Import ThemeToggle
+import { siteProfileData, personalContactsData, getUsefulLinks } from "@/data/site-data"; // Import getUsefulLinks
+import { ThemeToggle } from "@/components/app/ThemeToggle";
 
-export default function HomePage() {
+export default async function HomePage() {
+  // Fetch useful links on the server
+  const usefulLinks = await getUsefulLinks();
+
   return (
     <div className="flex flex-col min-h-screen">
       <main className="flex-grow container mx-auto px-4 py-8 md:px-6 md:py-12 max-w-4xl flex flex-col items-center animate-in fade-in duration-700">
@@ -15,7 +18,7 @@ export default function HomePage() {
         <section className="mb-10 md:mb-16 text-center w-full">
           <div className="flex justify-center mb-6">
             <Image
-              src="/my image.jpg"
+              src={siteProfileData.profilePictureUrl} // Use profile picture URL from data
               alt={`${siteProfileData.profileName} - Profile Picture`}
               width={160}
               height={160}
@@ -35,14 +38,15 @@ export default function HomePage() {
         <Separator className="my-6 md:my-10 bg-border/70" />
 
         <Section title="Get in Touch" className="w-full">
+          {/* Pass static contacts data */}
           <PersonalContacts contacts={personalContactsData} />
         </Section>
 
         <Separator className="my-6 md:my-10 bg-border/70" />
 
         <Section title="Curated Links & Resources" className="w-full">
-          {/* Show a subset of links on the homepage, e.g., first 6 */}
-          <UsefulLinks links={usefulLinksData.slice(0, 6)} />
+          {/* Pass fetched links to the client component */}
+          <UsefulLinks links={usefulLinks.slice(0, 6)} />
         </Section>
 
         <Separator className="my-6 md:my-10 bg-border/70" />

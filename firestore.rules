@@ -1,0 +1,16 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Allow public read access to useful links
+    match /usefulLinks/{linkId} {
+      allow read: if true;
+      allow write: if false; // Deny writes by default, manage through backend/admin
+    }
+
+    // Default deny all other access
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
