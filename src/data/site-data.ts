@@ -1,4 +1,3 @@
-'use server';
 
 import type { SiteProfile, PersonalContact, UsefulLink } from '@/types';
 import type { SuggestedLink } from '@/ai/flows/suggest-useful-links-flow';
