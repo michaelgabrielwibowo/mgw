@@ -14,7 +14,7 @@ export default function HomePage() {
         <section className="mb-10 md:mb-16 text-center w-full">
           <div className="flex justify-center mb-6">
             <Image
-              src={siteProfileData.profilePictureUrl}
+              src="/my image.jpg"
               alt={`${siteProfileData.profileName} - Profile Picture`}
               width={160}
               height={160}

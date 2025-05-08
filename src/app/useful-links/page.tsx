@@ -68,7 +68,6 @@ export default function UsefulLinksPage() {
   const [currentTime, setCurrentTime] = useState<string | null>(null);
   const [links, setLinks] = useState<UsefulLink[]>(initialUsefulLinksData.map(link => ({...link, createdAt: new Date(link.createdAt) }))); 
   const [isLoadingNewLinks, setIsLoadingNewLinks] = useState(false);
-  const [newlyAddedLinkIds, setNewlyAddedLinkIds] = useState<string[]>([]);
   const { toast } = useToast();
 
 
@@ -94,7 +93,7 @@ export default function UsefulLinksPage() {
     } else if (selectedFilter === 'popular') {
       processedLinks.sort((a, b) => b.popularity - a.popularity);
     } else if (selectedFilter === 'newly_added') {
-      processedLinks = processedLinks.filter(link => newlyAddedLinkIds.includes(link.id))
+      processedLinks = processedLinks.filter(link => link.isNew === true)
                                      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
     } else if (selectedFilter !== 'all') {
       processedLinks = processedLinks.filter(link => {
@@ -104,7 +103,7 @@ export default function UsefulLinksPage() {
     }
 
     return processedLinks;
-  }, [searchTerm, selectedFilter, links, newlyAddedLinkIds]);
+  }, [searchTerm, selectedFilter, links]);
 
   const handleSuggestNewLinks = async () => {
     setIsLoadingNewLinks(true);
@@ -118,17 +117,22 @@ export default function UsefulLinksPage() {
         const addedLinks: UsefulLink[] = addNewLinksToDataStore(result.suggestedLinks as SuggestedLink[]);
 
         if (addedLinks.length > 0) {
+          // Update the local links state to include the new links and their 'isNew' status
           setLinks(prevLinks => {
-            const updatedLinks = [...prevLinks];
+            const updatedLinksList = [...prevLinks];
             addedLinks.forEach(newLink => {
-              if (!updatedLinks.some(ul => ul.id === newLink.id)) {
-                 updatedLinks.push({...newLink, createdAt: new Date(newLink.createdAt) }); 
+              // Ensure we are adding a link with its full data, including 'isNew' and 'createdAt'
+              const completeNewLink = { ...newLink, createdAt: new Date(newLink.createdAt), isNew: true };
+              if (!updatedLinksList.some(ul => ul.id === completeNewLink.id)) {
+                 updatedLinksList.push(completeNewLink); 
+              } else {
+                // If link exists, update it, ensuring 'isNew' is true if it was re-suggested
+                const index = updatedLinksList.findIndex(ul => ul.id === completeNewLink.id);
+                updatedLinksList[index] = { ...updatedLinksList[index], ...completeNewLink, isNew: true};
               }
             });
-            return updatedLinks;
+            return updatedLinksList;
           });
-
-          setNewlyAddedLinkIds(addedLinks.map(l => l.id));
           
           toast({
             title: "New Links Suggested!",
@@ -169,11 +173,10 @@ export default function UsefulLinksPage() {
   };
   
   const handleFilterChange = (value: string) => {
-    if (selectedFilter === 'newly_added' && value !== 'newly_added') {
-      setNewlyAddedLinkIds([]); 
-    }
     setSelectedFilter(value);
   };
+
+  const hasNewlyAddedLinks = useMemo(() => links.some(link => link.isNew === true), [links]);
 
 
   if (currentTime === null) {
@@ -224,7 +227,8 @@ export default function UsefulLinksPage() {
                 </SelectTrigger>
                 <SelectContent>
                   {filterOptions.map(option => (
-                    (option.value === 'newly_added' && newlyAddedLinkIds.length === 0 && selectedFilter !== 'newly_added') ? null : (
+                    // Show 'newly_added' option if there are any links marked as new or if it's the currently selected filter
+                    (option.value === 'newly_added' && !hasNewlyAddedLinks && selectedFilter !== 'newly_added') ? null : (
                       <SelectItem key={option.value} value={option.value}>
                         {option.label}
                       </SelectItem>
@@ -243,7 +247,7 @@ export default function UsefulLinksPage() {
                 let IconComp: LucideIcon = iconMap["Link"]; // Default icon
                 
                 // Determine icon based on filter or link properties
-                if (selectedFilter === 'newly_added' && newlyAddedLinkIds.includes(link.id)) {
+                if (link.isNew && selectedFilter === 'newly_added') { // Check isNew for the 'newly_added' filter
                   IconComp = iconMap["Sparkles"];
                 } else if (selectedFilter === 'newest') {
                     IconComp = iconMap["Sparkles"];
@@ -257,7 +261,7 @@ export default function UsefulLinksPage() {
                 }
                 
                 return (
-                  <Card key={link.id} className="flex flex-col bg-card hover:shadow-xl transition-shadow duration-300 ease-in-out">
+                  <Card key={link.id} className={`flex flex-col bg-card hover:shadow-xl transition-shadow duration-300 ease-in-out ${link.isNew ? 'border-2 border-primary/50' : ''}`}>
                     <CardHeader>
                       <div className="flex items-start gap-3">
                         <IconComp className="w-6 h-6 mt-1 text-accent flex-shrink-0" />
@@ -268,6 +272,7 @@ export default function UsefulLinksPage() {
                               Category: <span className="font-semibold">{getCategoryLabel(link.category, link.iconName)}</span>
                               {selectedFilter === 'newest' && <span className="ml-2 text-muted-foreground">({link.createdAt.toLocaleDateString()})</span>}
                               {selectedFilter === 'popular' && <span className="ml-2 text-muted-foreground">(Popularity: {link.popularity})</span>}
+                              {link.isNew && <span className="ml-2 text-green-500 font-semibold">(New)</span>}
                            </CardDescription>
                         </div>
                       </div>
