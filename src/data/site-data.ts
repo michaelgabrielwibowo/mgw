@@ -51,12 +51,17 @@ export async function getUsefulLinks(): Promise<UsefulLink[]> {
     console.error("Error fetching useful links from Firestore:");
     console.error("Error Code:", error.code);
     console.error("Error Message:", error.message);
+    // The "Getting metadata from plugin failed" error often relates to authentication/permissions.
+    if (error.message?.includes('Getting metadata from plugin failed')) {
+        console.error("Hint: This often indicates an issue with Firebase Admin SDK authentication.");
+        console.error("Ensure Application Default Credentials (ADC) are configured correctly:");
+        console.error("  1. Run `gcloud auth application-default login` in your terminal.");
+        console.error("  2. Run `gcloud config set project YOUR_PROJECT_ID` (replace YOUR_PROJECT_ID).");
+        console.error("  3. Verify the authenticated user/service account has Firestore permissions (e.g., Cloud Datastore User role).");
+    }
     console.error("Error Details:", error.details); // Might contain more specifics
     console.error("Error Stack:", error.stack);
     console.error("-----------------------------------------------------");
-    console.error("Ensure Firebase Admin SDK is initialized correctly and Application Default Credentials (ADC) are configured.");
-    console.error("Run `gcloud auth application-default login` and `gcloud config set project YOUR_PROJECT_ID` in your environment.");
-    console.error("Also check Firestore permissions for the service account.");
 
     return []; // Return empty array on error
   }

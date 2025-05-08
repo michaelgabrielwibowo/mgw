@@ -20,12 +20,11 @@ if (!getApps().length) {
     console.error("Error Code:", error.code);
     console.error("Error Message:", error.message);
     console.error("-----------------------------------------------------");
-    console.error('Ensure Application Default Credentials (ADC) are set up correctly for your environment.');
-    console.error('INSTRUCTIONS:');
+    console.error('Ensure Application Default Credentials (ADC) are set up correctly for your environment:');
     console.error('1. Install Google Cloud SDK (`gcloud`).');
-    console.error('2. Run `gcloud auth application-default login`');
-    console.error('3. Run `gcloud config set project YOUR_PROJECT_ID` (replace YOUR_PROJECT_ID)');
-    console.error('4. Check Firestore permissions for the authenticated user/service account.');
+    console.error('2. Run `gcloud auth application-default login` in your terminal.');
+    console.error('3. Run `gcloud config set project YOUR_PROJECT_ID` (replace YOUR_PROJECT_ID with your actual Firebase/GCP project ID).');
+    console.error('4. Check Firestore permissions for the authenticated user/service account in the GCP console (IAM & Admin). Ensure it has a role like "Cloud Datastore User" or "Firebase Rules System".');
     console.error('-----------------------------------------------------');
     // Optionally, re-throw the error or handle it differently if initialization is critical
     // throw new Error('Could not initialize Firebase Admin SDK.');
@@ -36,18 +35,24 @@ if (!getApps().length) {
 
 
 // Attempt to get Firestore instance. This might also throw if initialization failed.
-let firestoreInstance;
-let authInstance;
+let firestoreInstance: admin.firestore.Firestore | undefined;
+let authInstance: admin.auth.Auth | undefined;
 try {
-    firestoreInstance = admin.firestore();
-    authInstance = admin.auth();
-    console.log("Firestore and Auth services accessed successfully.");
+    // Only try to get instances if initialization was successful (or already initialized)
+    if (getApps().length > 0) {
+        firestoreInstance = admin.firestore();
+        authInstance = admin.auth();
+        console.log("Firestore and Auth services accessed successfully.");
+    } else {
+         console.warn("Skipping Firestore/Auth access because Firebase Admin SDK initialization failed or didn't run.");
+    }
 } catch (error: any) {
     console.error("-----------------------------------------------------");
     console.error("Failed to get Firestore/Auth instance after initialization attempt:");
     console.error("Error Code:", error.code);
     console.error("Error Message:", error.message);
-    console.error("This usually indicates the initialization itself failed earlier.");
+    console.error("This usually indicates the initialization itself failed earlier or there are permission issues.");
+    console.error("Please check the initialization logs above and ADC setup instructions.");
     console.error("-----------------------------------------------------");
     // Set instances to potentially null/undefined or handle appropriately
     // Depending on how critical these are at startup.
@@ -55,6 +60,7 @@ try {
 }
 
 // Export the potentially initialized services
+// Use a non-null assertion (!) cautiously, or handle potential undefined cases where used.
 const firestore = firestoreInstance!;
 const auth = authInstance!;
 
