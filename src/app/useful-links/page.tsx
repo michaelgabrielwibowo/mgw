@@ -1,3 +1,4 @@
+
 "use client";
 import Link from 'next/link';
 import { ArrowLeft, ExternalLink, BookMarked, Lightbulb, BookOpenCheck, Users, FileText, Landmark, HelpCircle, Search, Github, Code, School, Award, Video, ListVideo, BookOpen, Cpu, Globe, type LucideIcon, Sparkles, TrendingUp, Eye, Youtube, Download, Loader2, Sheet, FileSpreadsheet, FileTextIcon } from 'lucide-react'; // Added Download, Loader2, Sheet, FileSpreadsheet, FileTextIcon
@@ -14,7 +15,8 @@ import {
   DropdownMenuSeparator
 } from "@/components/ui/dropdown-menu";
 import { useState, useMemo, useEffect } from 'react';
-import { usefulLinksData as initialUsefulLinksData, siteProfileData, addSuggestedLinks as addNewLinksToDataStore } from '@/data/site-data';
+// Import the mutable data source directly to reflect changes
+import { usefulLinksData, siteProfileData, addSuggestedLinks as addNewLinksToDataStore } from '@/data/site-data';
 import type { UsefulLink } from '@/types';
 import { suggestUsefulLinks, type SuggestUsefulLinksInput, type SuggestedLink } from '@/ai/flows/suggest-useful-links-flow';
 import { useToast } from '@/hooks/use-toast';
@@ -74,7 +76,8 @@ export default function UsefulLinksPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedFilter, setSelectedFilter] = useState('all');
   const [currentTime, setCurrentTime] = useState<string | null>(null);
-  const [links, setLinks] = useState<UsefulLink[]>(initialUsefulLinksData.map(link => ({...link, createdAt: new Date(link.createdAt) })));
+  // Initialize state from the potentially mutated data source
+  const [links, setLinks] = useState<UsefulLink[]>(() => usefulLinksData.map(link => ({...link, createdAt: new Date(link.createdAt) })));
   const [isLoadingNewLinks, setIsLoadingNewLinks] = useState(false);
   const { toast } = useToast();
 
@@ -124,25 +127,24 @@ export default function UsefulLinksPage() {
   const handleSuggestNewLinks = async () => {
     setIsLoadingNewLinks(true);
     try {
+      // Use the current state of links to avoid suggesting duplicates already in view
+      const currentLinksForInput = links.map(l => ({ title: l.title, url: l.url }));
       const input: SuggestUsefulLinksInput = {
-        existingLinks: links.map(l => ({ title: l.title, url: l.url })),
+        existingLinks: currentLinksForInput,
       };
       const result = await suggestUsefulLinks(input);
 
       if (result && result.suggestedLinks) {
-        // Make a copy of the current links to avoid direct mutation before setting state
-        const currentLinksCopy = [...links];
-
-        // Add new links to the data store (this mutates the source array)
+        // Add new links to the persistent (module-level) data store
         const addedLinks = addNewLinksToDataStore(result.suggestedLinks as SuggestedLink[]);
 
         if (addedLinks.length > 0) {
-          // Create a new array reflecting the added links for the state update
-           const updatedLinksList = initialUsefulLinksData.map(link => ({...link, createdAt: new Date(link.createdAt) }));
-
-
-          setLinks(updatedLinksList); // Update state with the new list from the data store
-
+          // Refresh local state from the updated persistent data store
+          const updatedLinksList = usefulLinksData.map(link => ({
+            ...link,
+            createdAt: new Date(link.createdAt) // Ensure createdAt is a Date object
+          }));
+          setLinks(updatedLinksList); // Update local state to reflect the newly added links
 
           toast({
             title: "New Links Suggested!",
@@ -184,7 +186,7 @@ export default function UsefulLinksPage() {
 
   const hasNewlyAddedLinks = useMemo(() => links.some(link => link.isNew === true), [links]);
 
-  const handleExport = (format: 'txt' | 'csv' | 'google-sheets' | 'google-docs') => {
+  const handleExport = (format: 'txt' | 'csv') => { // Removed Google options
     if (filteredLinks.length === 0) {
       toast({
         title: "No links to export",
@@ -194,15 +196,7 @@ export default function UsefulLinksPage() {
       return;
     }
 
-    if (format === 'google-sheets' || format === 'google-docs') {
-      toast({
-        title: "Coming Soon!",
-        description: `Export to ${format === 'google-sheets' ? 'Google Sheets' : 'Google Docs'} is not yet implemented.`,
-        variant: "default",
-      });
-      return; // Prevent further execution for unimplemented features
-    }
-
+    // Removed Google Sheets/Docs export logic
 
     let content = "";
     let filename = "useful_links";
@@ -302,7 +296,7 @@ export default function UsefulLinksPage() {
                   <DropdownMenuItem onClick={() => handleExport('csv')}>
                     <FileSpreadsheet className="mr-2 h-4 w-4"/> Export as CSV
                   </DropdownMenuItem>
-                  <DropdownMenuSeparator />
+                  {/* Removed Google Export options */}
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>

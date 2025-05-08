@@ -3,7 +3,7 @@ import type { SiteProfile, PersonalContact, UsefulLink } from '@/types';
 import type { SuggestedLink } from '@/ai/flows/suggest-useful-links-flow';
 
 export let siteProfileData: SiteProfile = {
-  siteTitle: 'Michael Gabriel Wibowo | Personal Page',
+  siteTitle: 'PersonaLink | Michael Gabriel Wibowo | Personal Page',
   metaDescriptionName: 'Michael Gabriel Wibowo',
   profileName: 'Michael Gabriel Wibowo',
   tagline: 'International Student from Indonesia at Tunghai University, Taiwan',
@@ -17,6 +17,7 @@ export let personalContactsData: PersonalContact[] = [
   { id: "4", title: "WhatsApp", value: "+(886) 936-147-487", url: "https://wa.me/qr/SN33DTMONLEIM1", iconName: "Whatsapp" },
 ];
 
+// This array will be mutated by addSuggestedLinks to simulate persistence
 export let usefulLinksData: UsefulLink[] = [
   {
     id: "1",
@@ -285,6 +286,7 @@ export let usefulLinksData: UsefulLink[] = [
 
 
 export function addSuggestedLinks(newLinks: SuggestedLink[]) {
+  // Use the mutable usefulLinksData array for checking duplicates and adding
   const existingUrls = new Set(usefulLinksData.map(link => link.url));
   let maxId = usefulLinksData.reduce((max, link) => Math.max(max, parseInt(link.id, 10)), 0);
 
@@ -305,9 +307,10 @@ export function addSuggestedLinks(newLinks: SuggestedLink[]) {
         popularity: Math.floor(Math.random() * 50), // Assign a random low popularity for new links
         isNew: true,
       };
+      // Directly mutate the exported array
       usefulLinksData.push(newLinkEntry);
       addedLinks.push(newLinkEntry);
-      existingUrls.add(suggestedLink.url);
+      existingUrls.add(suggestedLink.url); // Add to set to prevent adding duplicates from the same suggestion batch
     }
   });
   return addedLinks; // Return the actual links that were added
@@ -327,3 +330,4 @@ function mapKeywordsToIcon(keywords?: string): string | undefined {
   if (lowerKeywords.includes("circuit") || lowerKeywords.includes("electronic")) return "Cpu";
   return "Link"; // Default icon
 }
+
