@@ -1,18 +1,24 @@
 
 "use client";
 import Link from 'next/link';
-import { ArrowLeft, ExternalLink, BookMarked, Lightbulb, BookOpenCheck, Users, FileText, Landmark, HelpCircle, Search, Github, Code, School, Award, Video, ListVideo, BookOpen, Cpu, Globe, type LucideIcon, Sparkles, TrendingUp, Eye, Youtube } from 'lucide-react'; // Added Youtube
+import { ArrowLeft, ExternalLink, BookMarked, Lightbulb, BookOpenCheck, Users, FileText, Landmark, HelpCircle, Search, Github, Code, School, Award, Video, ListVideo, BookOpen, Cpu, Globe, type LucideIcon, Sparkles, TrendingUp, Eye, Youtube, Download, Loader2 } from 'lucide-react'; // Added Download, Loader2
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Section } from '@/components/app/Section';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { useState, useMemo, useEffect } from 'react';
 import { usefulLinksData as initialUsefulLinksData, siteProfileData, addSuggestedLinks as addNewLinksToDataStore } from '@/data/site-data'; 
 import type { UsefulLink } from '@/types'; 
 import { suggestUsefulLinks, type SuggestUsefulLinksInput, type SuggestedLink } from '@/ai/flows/suggest-useful-links-flow';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2 } from 'lucide-react';
+
 
 const iconMap: Record<string, LucideIcon> = {
   Lightbulb,
@@ -47,7 +53,7 @@ const filterOptions = [
   { value: 'web', label: 'Websites & Tools' },
   { value: 'project_repository', label: 'Project Repositories' },
   { value: 'book', label: 'Books' },
-  { value: 'youtube', label: 'YouTube Content' }, // Generic label for filter dropdown
+  { value: 'youtube', label: 'YouTube Content' }, 
 ];
 
 // Helper to get category label
@@ -117,18 +123,15 @@ export default function UsefulLinksPage() {
         const addedLinks: UsefulLink[] = addNewLinksToDataStore(result.suggestedLinks as SuggestedLink[]);
 
         if (addedLinks.length > 0) {
-          // Update the local links state to include the new links and their 'isNew' status
           setLinks(prevLinks => {
             const updatedLinksList = [...prevLinks];
             addedLinks.forEach(newLink => {
-              // Ensure we are adding a link with its full data, including 'isNew' and 'createdAt'
               const completeNewLink = { ...newLink, createdAt: new Date(newLink.createdAt), isNew: true };
-              if (!updatedLinksList.some(ul => ul.id === completeNewLink.id)) {
+              const existingLinkIndex = updatedLinksList.findIndex(ul => ul.id === completeNewLink.id || ul.url === completeNewLink.url);
+              if (existingLinkIndex === -1) {
                  updatedLinksList.push(completeNewLink); 
               } else {
-                // If link exists, update it, ensuring 'isNew' is true if it was re-suggested
-                const index = updatedLinksList.findIndex(ul => ul.id === completeNewLink.id);
-                updatedLinksList[index] = { ...updatedLinksList[index], ...completeNewLink, isNew: true};
+                updatedLinksList[existingLinkIndex] = { ...updatedLinksList[existingLinkIndex], ...completeNewLink, isNew: true};
               }
             });
             return updatedLinksList;
@@ -178,6 +181,71 @@ export default function UsefulLinksPage() {
 
   const hasNewlyAddedLinks = useMemo(() => links.some(link => link.isNew === true), [links]);
 
+  const handleExport = (format: 'txt' | 'csv') => {
+    if (filteredLinks.length === 0) {
+      toast({
+        title: "No links to export",
+        description: "Please refine your filters or add some links.",
+        variant: "default",
+      });
+      return;
+    }
+
+    let content = "";
+    let filename = "useful_links";
+    let mimeType = "";
+
+    if (format === 'txt') {
+      filename += ".txt";
+      mimeType = "text/plain;charset=utf-8;";
+      content = filteredLinks.map(link => {
+        return `Title: ${link.title}\nURL: ${link.url}\nAuthor: ${link.author || 'N/A'}\nDescription: ${link.description || 'N/A'}\nCategory: ${getCategoryLabel(link.category, link.iconName)}\nCreated At: ${link.createdAt.toISOString()}\nPopularity: ${link.popularity}\n---`;
+      }).join("\n\n");
+    } else if (format === 'csv') {
+      filename += ".csv";
+      mimeType = "text/csv;charset=utf-8;";
+      const header = ["ID", "Title", "URL", "Author", "Description", "Category", "Icon Name", "Created At", "Popularity", "Is New"];
+      
+      // Helper to escape CSV values
+      const escapeCsvValue = (value: string | number | boolean | Date | undefined | null) => {
+        if (value === undefined || value === null) return "";
+        let str = value instanceof Date ? value.toISOString() : String(value);
+        if (str.includes(',') || str.includes('"') || str.includes('\n')) {
+          str = '"' + str.replace(/"/g, '""') + '"';
+        }
+        return str;
+      };
+
+      const rows = filteredLinks.map(link => [
+        escapeCsvValue(link.id),
+        escapeCsvValue(link.title),
+        escapeCsvValue(link.url),
+        escapeCsvValue(link.author),
+        escapeCsvValue(link.description),
+        escapeCsvValue(getCategoryLabel(link.category, link.iconName)),
+        escapeCsvValue(link.iconName),
+        escapeCsvValue(link.createdAt),
+        escapeCsvValue(link.popularity),
+        escapeCsvValue(link.isNew)
+      ].join(","));
+      content = [header.join(","), ...rows].join("\n");
+    }
+
+    const blob = new Blob([content], { type: mimeType });
+    const linkElement = document.createElement("a");
+    linkElement.href = URL.createObjectURL(blob);
+    linkElement.download = filename;
+    document.body.appendChild(linkElement);
+    linkElement.click();
+    document.body.removeChild(linkElement);
+    URL.revokeObjectURL(linkElement.href);
+
+    toast({
+      title: `Exported as ${format.toUpperCase()}`,
+      description: `${filteredLinks.length} links have been exported to ${filename}.`,
+    });
+  };
+
 
   if (currentTime === null) {
     return (
@@ -198,14 +266,33 @@ export default function UsefulLinksPage() {
               Back to Home
             </Link>
           </Button>
-          <Button onClick={handleSuggestNewLinks} disabled={isLoadingNewLinks} variant="default" className="bg-primary hover:bg-primary/90 text-primary-foreground">
-            {isLoadingNewLinks ? (
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            ) : (
-              <Lightbulb className="mr-2 h-4 w-4" />
-            )}
-            Suggest New Links
-          </Button>
+          <div className="flex gap-2">
+            <Button onClick={handleSuggestNewLinks} disabled={isLoadingNewLinks} variant="default" className="bg-primary hover:bg-primary/90 text-primary-foreground">
+              {isLoadingNewLinks ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                <Lightbulb className="mr-2 h-4 w-4" />
+              )}
+              Suggest New Links
+            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline">
+                  <Download className="mr-2 h-4 w-4" /> Export
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => handleExport('txt')}>
+                  Export as TXT
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => handleExport('csv')}>
+                  Export as CSV
+                </DropdownMenuItem>
+                {/* <DropdownMenuItem disabled>Export as PDF (Coming Soon)</DropdownMenuItem> */}
+                {/* <DropdownMenuItem disabled>Export as DOCX (Coming Soon)</DropdownMenuItem> */}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         </div>
         
         <Section title="View All" className="w-full">
@@ -227,7 +314,6 @@ export default function UsefulLinksPage() {
                 </SelectTrigger>
                 <SelectContent>
                   {filterOptions.map(option => (
-                    // Show 'newly_added' option if there are any links marked as new or if it's the currently selected filter
                     (option.value === 'newly_added' && !hasNewlyAddedLinks && selectedFilter !== 'newly_added') ? null : (
                       <SelectItem key={option.value} value={option.value}>
                         {option.label}
@@ -244,19 +330,17 @@ export default function UsefulLinksPage() {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {filteredLinks.map((link) => {
-                let IconComp: LucideIcon = iconMap["Link"]; // Default icon
+                let IconComp: LucideIcon = iconMap["Link"]; 
                 
-                // Determine icon based on filter or link properties
-                if (link.isNew && selectedFilter === 'newly_added') { // Check isNew for the 'newly_added' filter
+                if (link.isNew && selectedFilter === 'newly_added') { 
                   IconComp = iconMap["Sparkles"];
                 } else if (selectedFilter === 'newest') {
                     IconComp = iconMap["Sparkles"];
                 } else if (selectedFilter === 'popular') {
                     IconComp = iconMap["TrendingUp"];
                 } else if (link.iconName && iconMap[link.iconName]) {
-                    // Specific icons for YouTube content based on iconName
-                    if (link.iconName === 'Youtube') IconComp = Youtube; // Filled Brand Icon for playlists
-                    else if (link.iconName === 'Video') IconComp = Video; // Outline Camera for single videos
+                    if (link.iconName === 'Youtube') IconComp = Youtube; 
+                    else if (link.iconName === 'Video') IconComp = Video; 
                     else IconComp = iconMap[link.iconName];
                 }
                 
