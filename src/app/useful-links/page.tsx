@@ -54,7 +54,7 @@ const filterOptions = [
   { value: 'popular', label: 'Most Popular' },
   { value: 'newly_added', label: 'Recently Suggested'},
   { value: 'learning', label: 'Learning & Education' },
-  { value: 'web', label: 'Websites & Tools' },
+  { value: 'website', label: 'Websites & Tools' }, // Renamed from 'web'
   { value: 'project_repository', label: 'Project Repositories' },
   { value: 'book', label: 'Books' },
   { value: 'youtube', label: 'YouTube Content' },
@@ -67,6 +67,9 @@ const getCategoryLabel = (categoryValue?: string, iconNameValue?: string) => {
     if (iconNameValue === 'Youtube') return 'YouTube Playlist';
     return 'YouTube Content'; // Fallback for general YouTube category
   }
+   // Corrected category value check
+  if (categoryValue === 'website') return 'Websites & Tools';
+
   const option = filterOptions.find(opt => opt.value === categoryValue);
   return option ? option.label : (categoryValue ? categoryValue.charAt(0).toUpperCase() + categoryValue.slice(1) : "Link");
 };
@@ -104,7 +107,8 @@ export default function UsefulLinksPage() {
     if (selectedFilter === 'newest') {
       processedLinks.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
     } else if (selectedFilter === 'popular') {
-      processedLinks.sort((a, b) => b.popularity - a.popularity);
+      // Ensure popularity is treated as a number for sorting
+      processedLinks.sort((a, b) => (b.popularity || 0) - (a.popularity || 0));
     } else if (selectedFilter === 'newly_added') {
       processedLinks = processedLinks.filter(link => link.isNew === true)
                                      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
@@ -132,11 +136,16 @@ export default function UsefulLinksPage() {
       const input: SuggestUsefulLinksInput = {
         existingLinks: currentLinksForInput,
       };
+      console.log("Calling suggestUsefulLinks server action with input:", input);
       const result = await suggestUsefulLinks(input);
+      console.log("Received result from suggestUsefulLinks:", result);
+
 
       if (result && result.suggestedLinks) {
         // Add new links to the persistent (module-level) data store
         const addedLinks = addNewLinksToDataStore(result.suggestedLinks as SuggestedLink[]);
+         console.log("Added links to data store:", addedLinks);
+
 
         if (addedLinks.length > 0) {
           // Refresh local state from the updated persistent data store
@@ -145,6 +154,7 @@ export default function UsefulLinksPage() {
             createdAt: new Date(link.createdAt) // Ensure createdAt is a Date object
           }));
           setLinks(updatedLinksList); // Update local state to reflect the newly added links
+          console.log("Updated local links state:", updatedLinksList);
 
           toast({
             title: "New Links Suggested!",
@@ -159,6 +169,7 @@ export default function UsefulLinksPage() {
             )
           });
         } else {
+           console.log("No new unique links were added.");
           toast({
             title: "No New Links",
             description: "The AI couldn't find any new links this time, or they were duplicates of existing ones.",
@@ -166,13 +177,18 @@ export default function UsefulLinksPage() {
           });
         }
       } else {
-        throw new Error("AI did not return suggested links.");
+        console.error("AI did not return expected result structure:", result);
+        throw new Error("AI did not return suggested links in the expected format.");
       }
     } catch (error) {
-      console.error("Failed to suggest new links:", error);
+      console.error("Failed to suggest new links (fetch or server action error):", error);
+       let description = "Could not fetch new link suggestions. Please try again later.";
+       if (error instanceof Error) {
+           description = error.message || description;
+       }
       toast({
         title: "Error Suggesting Links",
-        description: "Could not fetch new link suggestions. Please try again later.",
+        description: description,
         variant: "destructive",
       });
     } finally {
@@ -186,7 +202,7 @@ export default function UsefulLinksPage() {
 
   const hasNewlyAddedLinks = useMemo(() => links.some(link => link.isNew === true), [links]);
 
-  const handleExport = (format: 'txt' | 'csv') => { // Removed Google options
+  const handleExport = (format: 'txt' | 'csv' ) => { // Removed Google options and other formats for simplicity
     if (filteredLinks.length === 0) {
       toast({
         title: "No links to export",
@@ -196,8 +212,6 @@ export default function UsefulLinksPage() {
       return;
     }
 
-    // Removed Google Sheets/Docs export logic
-
     let content = "";
     let filename = "useful_links";
     let mimeType = "";
@@ -206,7 +220,7 @@ export default function UsefulLinksPage() {
       filename += ".txt";
       mimeType = "text/plain;charset=utf-8;";
       content = filteredLinks.map(link => {
-        return `Title: ${link.title}\nURL: ${link.url}\nAuthor: ${link.author || 'N/A'}\nDescription: ${link.description || 'N/A'}\nCategory: ${getCategoryLabel(link.category, link.iconName)}\nCreated At: ${link.createdAt.toISOString()}\nPopularity: ${link.popularity}\nIs New: ${link.isNew ? 'Yes' : 'No'}\n---`;
+        return `Title: ${link.title}\nURL: ${link.url}\nAuthor: ${link.author || 'N/A'}\nDescription: ${link.description || 'N/A'}\nCategory: ${getCategoryLabel(link.category, link.iconName)}\nCreated At: ${link.createdAt instanceof Date ? link.createdAt.toISOString() : link.createdAt}\nPopularity: ${link.popularity}\nIs New: ${link.isNew ? 'Yes' : 'No'}\n---`;
       }).join("\n\n");
     } else if (format === 'csv') {
       filename += ".csv";
@@ -217,11 +231,14 @@ export default function UsefulLinksPage() {
       const escapeCsvValue = (value: string | number | boolean | Date | undefined | null) => {
         if (value === undefined || value === null) return "";
         let str = value instanceof Date ? value.toISOString() : String(value);
-        if (str.includes(',') || str.includes('"') || str.includes('\n')) {
-          str = '"' + str.replace(/"/g, '""') + '"';
+        // Ensure strings containing comma, double quote, or newline are enclosed in double quotes
+        if (/[",\\n]/.test(str)) {
+             // Escape existing double quotes by doubling them
+             str = '"' + str.replace(/"/g, '""') + '"';
         }
         return str;
-      };
+     };
+
 
       const rows = filteredLinks.map(link => [
         escapeCsvValue(link.id),
@@ -231,26 +248,39 @@ export default function UsefulLinksPage() {
         escapeCsvValue(link.description),
         escapeCsvValue(getCategoryLabel(link.category, link.iconName)),
         escapeCsvValue(link.iconName),
-        escapeCsvValue(link.createdAt),
+        escapeCsvValue(link.createdAt), // Already a Date object or string
         escapeCsvValue(link.popularity),
         escapeCsvValue(link.isNew ? 'Yes' : 'No') // Make boolean more readable
       ].join(","));
       content = [header.join(","), ...rows].join("\n");
+    } else {
+        toast({ title: "Export Error", description: "Unsupported export format.", variant: "destructive" });
+        return;
     }
 
-    const blob = new Blob([content], { type: mimeType });
-    const linkElement = document.createElement("a");
-    linkElement.href = URL.createObjectURL(blob);
-    linkElement.download = filename;
-    document.body.appendChild(linkElement);
-    linkElement.click();
-    document.body.removeChild(linkElement);
-    URL.revokeObjectURL(linkElement.href);
 
-    toast({
-      title: `Exported as ${format.toUpperCase()}`,
-      description: `${filteredLinks.length} links have been exported to ${filename}.`,
-    });
+    try {
+        const blob = new Blob([content], { type: mimeType });
+        const linkElement = document.createElement("a");
+        linkElement.href = URL.createObjectURL(blob);
+        linkElement.download = filename;
+        document.body.appendChild(linkElement);
+        linkElement.click();
+        document.body.removeChild(linkElement);
+        URL.revokeObjectURL(linkElement.href);
+
+        toast({
+          title: `Exported as ${format.toUpperCase()}`,
+          description: `${filteredLinks.length} links have been exported to ${filename}.`,
+        });
+    } catch (exportError) {
+        console.error("Export failed:", exportError);
+        toast({
+            title: "Export Failed",
+            description: "Could not generate or download the export file.",
+            variant: "destructive",
+          });
+    }
   };
 
 
@@ -296,7 +326,7 @@ export default function UsefulLinksPage() {
                   <DropdownMenuItem onClick={() => handleExport('csv')}>
                     <FileSpreadsheet className="mr-2 h-4 w-4"/> Export as CSV
                   </DropdownMenuItem>
-                  {/* Removed Google Export options */}
+                  {/* Removed other export options */}
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
@@ -337,32 +367,47 @@ export default function UsefulLinksPage() {
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {filteredLinks.map((link) => {
-                  let IconComp: LucideIcon = iconMap["Link"];
+                  let IconComp: LucideIcon = iconMap["Link"]; // Default icon
 
+                  // Determine icon based on various factors
                   if (link.isNew && selectedFilter === 'newly_added') {
-                    IconComp = iconMap["Sparkles"];
-                  } else if (selectedFilter === 'newest') {
-                      IconComp = iconMap["Sparkles"];
-                  } else if (selectedFilter === 'popular') {
-                      IconComp = iconMap["TrendingUp"];
+                    IconComp = iconMap["Sparkles"]; // Highlight newly added if filter is active
                   } else if (link.iconName && iconMap[link.iconName]) {
-                      if (link.iconName === 'Youtube') IconComp = Youtube;
-                      else if (link.iconName === 'Video') IconComp = Video;
-                      else IconComp = iconMap[link.iconName];
+                     // Specific icons for YouTube based on stored iconName hint
+                     if (link.iconName === 'Youtube') IconComp = Youtube; // Brand logo for playlists
+                     else if (link.iconName === 'Video') IconComp = Video; // Camera outline for single videos
+                     else IconComp = iconMap[link.iconName]; // Use mapped icon
+                  } else {
+                     // Fallback logic if iconName is missing or not in map
+                     switch(link.category) {
+                         case 'project_repository': IconComp = Github; break;
+                         case 'website': IconComp = Globe; break;
+                         case 'book': IconComp = BookOpen; break;
+                         case 'learning': IconComp = School; break;
+                         case 'youtube': IconComp = Youtube; break; // Default to playlist icon for general YouTube
+                         default: IconComp = ExternalLink; // General external link icon
+                     }
                   }
+
 
                   return (
                     <Card key={link.id} className={`flex flex-col bg-card hover:shadow-xl transition-shadow duration-300 ease-in-out ${link.isNew ? 'border-2 border-primary/50' : ''}`}>
                       <CardHeader>
                         <div className="flex items-start gap-3">
-                          <IconComp className="w-6 h-6 mt-1 text-accent flex-shrink-0" />
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                                <IconComp className="w-6 h-6 mt-1 text-accent flex-shrink-0" />
+                            </TooltipTrigger>
+                            <TooltipContent>
+                                <p>{getCategoryLabel(link.category, link.iconName)}</p>
+                            </TooltipContent>
+                           </Tooltip>
                           <div className="flex-grow">
                             <CardTitle className="text-xl text-primary">{link.title}</CardTitle>
                             {link.author && <CardDescription>By {link.author}</CardDescription>}
                              <CardDescription className="text-xs mt-1">
-                                Category: <span className="font-semibold">{getCategoryLabel(link.category, link.iconName)}</span>
-                                {selectedFilter === 'newest' && <span className="ml-2 text-muted-foreground">({link.createdAt.toLocaleDateString()})</span>}
-                                {selectedFilter === 'popular' && <span className="ml-2 text-muted-foreground">(Popularity: {link.popularity})</span>}
+                                {selectedFilter === 'newest' && link.createdAt instanceof Date && <span className="text-muted-foreground">Added: {link.createdAt.toLocaleDateString()}</span>}
+                                {selectedFilter === 'popular' && <span className="text-muted-foreground">Popularity: {link.popularity || 0}</span>}
                                 {link.isNew && <span className="ml-2 text-green-500 font-semibold">(New)</span>}
                              </CardDescription>
                           </div>
