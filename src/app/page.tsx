@@ -5,6 +5,7 @@ import { FeedbackForm } from "@/components/app/FeedbackForm";
 import { Section } from "@/components/app/Section";
 import { Separator } from "@/components/ui/separator";
 import { siteProfileData, personalContactsData, usefulLinksData } from "@/data/site-data";
+import { ThemeToggle } from "@/components/app/ThemeToggle"; // Import ThemeToggle
 
 export default function HomePage() {
   return (
@@ -51,9 +52,14 @@ export default function HomePage() {
         </Section>
       </main>
 
-      <footer className="py-6 text-center text-sm text-muted-foreground border-t border-border/50">
-        <p>&copy; {new Date().getFullYear()} {siteProfileData.footerName}. All rights reserved.</p>
-        <p className="mt-1">Built with Next.js and Tailwind CSS.</p>
+      <footer className="py-6 px-4 text-center text-sm text-muted-foreground border-t border-border/50">
+        <div className="flex flex-col sm:flex-row justify-center items-center gap-4">
+           <p>&copy; {new Date().getFullYear()} {siteProfileData.footerName}. All rights reserved.</p>
+           <p className="mt-1 sm:mt-0">Built with Next.js and Tailwind CSS.</p>
+           <div className="mt-2 sm:mt-0">
+             <ThemeToggle />
+           </div>
+        </div>
       </footer>
     </div>
   );
