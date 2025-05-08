@@ -19,8 +19,8 @@ import { usefulLinksData as initialUsefulLinksData, siteProfileData, addSuggeste
 import type { UsefulLink } from '@/types';
 import { suggestUsefulLinks, type SuggestUsefulLinksInput, type SuggestedLink } from '@/ai/flows/suggest-useful-links-flow';
 import { useToast } from '@/hooks/use-toast';
-import { ThemeToggle } from '@/components/app/ThemeToggle'; // Import ThemeToggle
-import { TooltipProvider } from '@/components/ui/tooltip'; // Import TooltipProvider
+import { ThemeToggle } from '@/components/app/ThemeToggle';
+import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'; // Import Tooltip components
 
 
 const iconMap: Record<string, LucideIcon> = {
@@ -271,7 +271,7 @@ export default function UsefulLinksPage() {
   }
 
   return (
-     <TooltipProvider> {/* Wrap with TooltipProvider */}
+     <TooltipProvider>
       <div className="flex flex-col min-h-screen">
         <main className="flex-grow container mx-auto px-4 py-8 md:px-6 md:py-12 max-w-4xl">
           <div className="mb-8 flex items-center justify-between flex-wrap gap-4">
@@ -415,7 +415,6 @@ export default function UsefulLinksPage() {
            </div>
         </footer>
       </div>
-     </TooltipProvider> {/* Close TooltipProvider */}
+     </TooltipProvider>
   );
 }
-
