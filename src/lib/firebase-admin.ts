@@ -83,10 +83,7 @@ if (!getApps().length) {
 }
 
 // Export the potentially initialized services.
-// Using assertion cautiously. Consider adding checks where these are imported/used.
-const firestore = firestoreInstance!;
-const auth = authInstance!;
+const firestore = firestoreInstance; // Export potentially undefined instance
+const auth = authInstance; // Export potentially undefined instance
 
 export { admin, firestore, auth };
-
-    
