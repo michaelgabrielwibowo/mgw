@@ -1,3 +1,4 @@
+
 import Image from "next/image";
 import { PersonalContacts } from "@/components/app/PersonalContacts";
 import { UsefulLinks } from "@/components/app/UsefulLinks";
@@ -6,11 +7,37 @@ import { Section } from "@/components/app/Section";
 import { Separator } from "@/components/ui/separator";
 import { siteProfileData, personalContactsData, getUsefulLinks } from "@/data/site-data"; // Import getUsefulLinks
 import { ThemeToggle } from "@/components/app/ThemeToggle";
+import type { UsefulLink } from "@/types"; // Import UsefulLink type
 
 export default async function HomePage() {
-  // Fetch useful links on the server
-  const usefulLinks = await getUsefulLinks();
+  // Fetch links on the server
+  let usefulLinks: UsefulLink[] = [];
+  try {
+    usefulLinks = await getUsefulLinks();
+    // Keep only the first 6 links for the homepage display
+    usefulLinks = usefulLinks.slice(0, 6);
+  } catch (error) {
+    // Log detailed error but don't block rendering
+    console.error("-----------------------------------------------------");
+    console.error("Failed to fetch useful links for homepage:");
+    if (error instanceof Error) {
+      console.error(`Code: ${(error as any).code}, Message: ${error.message}`);
+      if (error.message?.includes('Getting metadata from plugin failed') || error.message?.includes('Could not refresh access token')) {
+        console.warn("Firebase ADC Hint: This often indicates an issue with Firebase Admin SDK authentication or permissions.");
+        console.warn("Check Firebase Admin initialization logs and ensure ADC are configured (run `gcloud auth application-default login`, `gcloud config set project YOUR_PROJECT_ID`, check IAM).");
+      } else if ((error as any).code === 7) { // Firestore permission denied
+        console.warn("Firebase Permission Denied: Check Firestore security rules and IAM permissions.");
+      }
+    } else {
+      console.error("An unknown error occurred:", error);
+    }
+    console.error("-----------------------------------------------------");
+    // Fallback to empty array, page will render without links section content
+    usefulLinks = [];
+  }
 
+
+  // --- Start of the actual HomePage component's return statement ---
   return (
     <div className="flex flex-col min-h-screen">
       <main className="flex-grow container mx-auto px-4 py-8 md:px-6 md:py-12 max-w-4xl flex flex-col items-center animate-in fade-in duration-700">
@@ -45,8 +72,8 @@ export default async function HomePage() {
         <Separator className="my-6 md:my-10 bg-border/70" />
 
         <Section title="Curated Links & Resources" className="w-full">
-          {/* Pass fetched links to the client component */}
-          <UsefulLinks links={usefulLinks.slice(0, 6)} />
+          {/* Pass fetched links (up to 6) to the client component */}
+          <UsefulLinks links={usefulLinks} />
         </Section>
 
         <Separator className="my-6 md:my-10 bg-border/70" />
