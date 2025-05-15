@@ -1,0 +1,12 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"type": "shell",
+			"label": "Initialize frontend with Create React App",
+			"command": "npx create-react-app client --template typescript",
+			"group": "build",
+			"isBackground": false
+		}
+	]
+}
