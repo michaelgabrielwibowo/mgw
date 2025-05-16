@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState } from 'react';
@@ -14,7 +13,7 @@ import { useForm, SubmitHandler } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useToast } from "@/hooks/use-toast";
-import * as XLSX from 'xlsx';
+import ExcelJS from 'exceljs';
 
 const SuggestionFormSchema = z.object({
   keywords: z.string().optional(),
@@ -112,34 +111,31 @@ export function AISuggestionForm({ onSuggest, isLoading }: AISuggestionFormProps
     }
   };
 
-  const parseXlsxContent = (buffer: ArrayBuffer): ExistingLink[] => {
+  const parseXlsxContent = async (buffer: ArrayBuffer): Promise<ExistingLink[]> => {
     try {
-      const workbook = XLSX.read(buffer, { type: 'array' });
-      const firstSheetName = workbook.SheetNames[0];
-      if (!firstSheetName) {
+      const workbook = new ExcelJS.Workbook();
+      await workbook.xlsx.load(buffer);
+      const worksheet = workbook.worksheets[0];
+      if (!worksheet) {
         toast({ title: "XLSX Parsing Error", description: "No sheets found in the XLSX file.", variant: "destructive" });
         return [];
       }
-      const worksheet = workbook.Sheets[firstSheetName];
-      const jsonData = XLSX.utils.sheet_to_json<any>(worksheet, { header: 1 });
-
-      if (jsonData.length === 0) return [];
-
-      const headers = (jsonData[0] as any[]).map(h => String(h).toLowerCase().trim());
+      const rows = Array.from(worksheet.getSheetValues());
+      if (rows.length < 2) return [];
+      const headers = (rows[1] as any[]).map((h: any) => String(h).toLowerCase().trim());
       const urlIndex = headers.indexOf('url');
       const titleIndex = headers.indexOf('title');
-
       if (urlIndex === -1) {
         toast({ title: "XLSX Parsing Error", description: "XLSX file must contain a 'url' column in the first sheet.", variant: "destructive" });
         return [];
       }
-
       const links: ExistingLink[] = [];
-      for (let i = 1; i < jsonData.length; i++) {
-        const row = jsonData[i] as any[];
-        const url = row[urlIndex] ? String(row[urlIndex]).trim() : '';
+      for (let i = 2; i < rows.length; i++) {
+        const row = rows[i] as any[];
+        if (!row) continue;
+        const url = row[urlIndex + 1] ? String(row[urlIndex + 1]).trim() : '';
         if (url) {
-          const title = titleIndex !== -1 && row[titleIndex] ? String(row[titleIndex]).trim() : undefined;
+          const title = titleIndex !== -1 && row[titleIndex + 1] ? String(row[titleIndex + 1]).trim() : undefined;
           links.push({ title, url });
         }
       }
@@ -177,9 +173,8 @@ export function AISuggestionForm({ onSuggest, isLoading }: AISuggestionFormProps
           links = parseJsonContent(await file.text());
         } else if (file.name.endsWith('.xlsx')) {
           const arrayBuffer = await file.arrayBuffer();
-          links = parseXlsxContent(arrayBuffer);
-        }
-         else {
+          links = await parseXlsxContent(arrayBuffer);
+        } else {
           toast({ title: "Unsupported File Type", description: "Please upload a .txt, .csv, .json, or .xlsx file.", variant: "destructive" });
           setUploadedFile(null);
           setParsedExistingLinks([]);

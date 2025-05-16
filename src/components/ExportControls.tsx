@@ -1,4 +1,3 @@
-
 'use client';
 
 import type { LinkItem, ExistingLink } from '@/types';
@@ -7,7 +6,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Download } from 'lucide-react';
 import html2canvas from 'html2canvas';
 import { format } from 'date-fns';
-import * as XLSX from 'xlsx';
+import ExcelJS from 'exceljs';
 
 interface ExportControlsProps {
   linksToExport: LinkItem[];
@@ -127,7 +126,7 @@ export function ExportControls({ linksToExport, uploadedLinks, latestAISuggestio
     downloadFile(blob, `usefuls_${filenameSuffix}_${dateTimeStr}.json`);
   };
 
-  const handleExportXLSX = (combined = false) => {
+  const handleExportXLSX = async (combined = false) => {
     const dateTimeStr = getCurrentDateTimeFormatted();
     let sheetData;
     let filenameSuffix = 'export';
@@ -164,11 +163,16 @@ export function ExportControls({ linksToExport, uploadedLinks, latestAISuggestio
         Origin: link.source === 'ai' ? 'AI Generated' : 'Curated',
       }));
     }
-    
-    const ws = XLSX.utils.json_to_sheet(sheetData);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, sheetName);
-    XLSX.writeFile(wb, `usefuls_${filenameSuffix}_${dateTimeStr}.xlsx`);
+
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet(sheetName);
+    if (sheetData.length > 0) {
+      worksheet.columns = Object.keys(sheetData[0]).map(key => ({ header: key, key }));
+      sheetData.forEach(row => worksheet.addRow(row));
+    }
+    const buffer = await workbook.xlsx.writeBuffer();
+    const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    downloadFile(blob, `usefuls_${filenameSuffix}_${dateTimeStr}.xlsx`);
   };
 
   const handleExportPNG = (combined = false) => {
